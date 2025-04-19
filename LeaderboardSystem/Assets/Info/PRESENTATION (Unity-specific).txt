@@ -1,0 +1,24 @@
+1. UI/
+   - Prefabs/
+     - PlayerEntry.prefab
+     - PlayerDetailsModal.prefab
+     - AddPlayerModal.prefab
+   - Components/
+     - LeaderboardUIController.cs
+     - PlayerEntryView.cs
+     - PlayerDetailsView.cs
+     - AddPlayerView.cs
+   - ViewModels/
+     - PlayerViewModel.cs
+     - LeaderboardViewModel.cs
+
+2. Utilities/
+   - UnityUIHelpers.cs
+   - TextureLoader.cs
+   - InputValidators.cs
+
+3. ScriptableObjects/
+   - LeaderboardConfig.asset
+     - int MaxPlayers
+     - string DefaultPlayerImagePath
+     - StorageType StorageType

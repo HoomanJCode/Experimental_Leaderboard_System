@@ -1,0 +1,34 @@
+1. Models/
+   - Player.cs
+     - string Id
+     - string Name
+     - int Score
+     - byte[] ProfileImage
+     - string Description
+     - DateTime LastUpdated
+   - Leaderboard.cs
+     - List<Player> Players
+     - int Version
+     - DateTime LastUpdated
+
+2. DTOs/
+   - PlayerDto.cs (for input validation)
+   - LeaderboardDto.cs
+
+3. Interfaces/
+   - Repositories/
+     - IPlayerRepository.cs
+     - ILeaderboardRepository.cs
+   - Services/
+     - ILeaderboardService.cs
+     - IPlayerImageService.cs
+   - Storage/
+     - IStorageAdapter.cs
+
+4. Services/
+   - LeaderboardService.cs (implements ILeaderboardService)
+   - PlayerImageService.cs (implements IPlayerImageService)
+
+5. Events/
+   - LeaderboardUpdatedEvent.cs
+   - PlayerSelectedEvent.cs

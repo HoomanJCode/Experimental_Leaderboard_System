@@ -1,0 +1,13 @@
+Leaderboard System
+├── Core (Pure C#)
+│   ├── Domain Models
+│   ├── Services (Interfaces)
+│   ├── Repositories (Interfaces)
+│   └── Use Cases
+├── Infrastructure
+│   ├── Storage Implementations
+│   └── External Services
+└── Presentation (Unity)
+    ├── UI Components
+    ├── View Models
+    └── Controllers
