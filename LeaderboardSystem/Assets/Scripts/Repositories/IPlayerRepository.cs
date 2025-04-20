@@ -5,10 +5,9 @@ namespace Repositories
 {
     public interface IPlayerRepository
     {
-        Task AddAsync(Player player);
-        Task UpdateAsync(Player player);
+        Task<int> AddPlayerAsync(SavePlayerDto player);
+        Task UpdatePlayerAsync(Player player);
         Task<Player> GetByIdAsync(int id);
-        Task DeleteAsync(int id);
         Task SaveChangesAsync();
     }
 }
