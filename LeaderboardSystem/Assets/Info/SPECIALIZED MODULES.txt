@@ -1,7 +1,0 @@
-1. ObjectPool/
-   - PlayerEntryPool.cs (for UI element recycling)
-2. Caching/
-   - PlayerImageCache.cs
-   - LeaderboardCache.cs
-3. Analytics/
-   - LeaderboardAnalyticsTracker.cs (optional)

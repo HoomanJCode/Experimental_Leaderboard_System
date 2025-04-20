@@ -1,0 +1,41 @@
+[Storage Layer]
+├─ IStorageAdapter<T> (interface)
+│  ├─ PhotoFileAdapter (implements IStorageAdapter<byte[]>)
+│  └─ TextFileAdapter (implements IStorageAdapter<string>)
+
+[Repositories]
+├─ PlayerRepository (IPlayerRepository)
+│  └─ Depends on: TextFileAdapter (for string data)
+│
+├─ AvatarRepository (IAvatarRepository)
+│  └─ Depends on: PhotoFileAdapter (for byte[] images)
+│
+└─ LeaderboardRepository (ILeaderboardRepository)
+   └─ Depends on: TextFileAdapter (storing PlayerScore data as string)
+
+[Services]
+├─ PlayersAuthenticationService
+│  └─ Depends on: IPlayerRepository
+│     └─ (PlayerRepository)
+│
+├─ MainLeaderboard (LeaderboardService)
+│  └─ Depends on: 
+│     ├─ ILeaderboardRepository (LeaderboardRepository)
+│     └─ (inherits MonoBehaviour)
+│
+└─ ILeaderboardService (interface)
+   └─ Implemented by: LeaderboardService/MainLeaderboard
+
+[UI Layer]
+├─ LeaderboardViewMenu
+│  └─ Depends on:
+│     ├─ LeaderboardService (MainLeaderboard)
+│     └─ PlayerLeaderboardRecord
+│
+├─ CreatePlayerMenu
+│  └─ Depends on: PlayersAuthenticationService
+│
+└─ PlayerLeaderboardRecord
+   └─ Depends on:
+      ├─ PlayersAuthenticationService (for player data)
+      └─ LeaderboardService (for score operations)

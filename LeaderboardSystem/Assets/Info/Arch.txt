@@ -1,0 +1,70 @@
+Storage/
+     - IStorageAdapter.cs
+        - Exists
+        - SaveAsync
+        - LoadAsync
+        - Delete
+     - PhotoFileAdapter.cs : IStorageAdapter<byte[]>
+     - TextFileAdapter.cs : IStorageAdapter<string>
+
+Repositories/Models/
+   - Player.cs
+     - int Id
+     - string Name
+     - string Description
+   - PlayerAvatar.cs
+     - int PlayerId
+     - byte[] ProfileImage
+   - PlayerScore.cs
+     - int PlayerId
+     - int Score
+
+Repositories/
+     - IPlayerRepository.cs
+        - AddAsync
+        - UpdateAsync
+        - GetByIdAsync
+        - DeleteAsync
+        - SaveChangesAsync
+     - IAvatarRepository.cs
+        - AddAsync
+        - UpdateAsync
+        - GetByIdAsync
+        - DeleteAsync
+     - ILeaderboardRepository.cs
+        - SaveChangesAsync
+        - DeleteAsync
+     - PlayerRepository.cs : IPlayerRepository
+     - AvatarRepository.cs : IAvatarRepository
+     - LeaderboardRepository.cs : ILeaderboardRepository
+        - List<PlayerScore> Scores
+
+Services/
+   - PlayersAuthenticationService.cs (Is not Monobehaviour)
+      - Static Instance
+      - Static LoadSingletone
+      - AddPlayer
+      - RemovePlayer
+      - UpdatePlayer
+      - GetPlayerById
+   - ILeaderboardService.cs
+      - SortScoresAsync
+      - PushScoreAsync
+      - GetHighestScoresAsync
+   - abstract LeaderboardService.cs : Monobehaviour,ILeaderboardService
+   - MainLeaderboard.cs : LeaderboardService
+   
+UI/
+    - LeaderboardViewMenu.cs : MenuView
+        - LeaderboardService Leaderboard
+        - private AddRecord
+        - ClearList
+        - RecreateList
+    - PlayerLeaderboardRecord.cs : Monobehaviour
+        - LoadDataById
+        - SetScore
+        - DeletePlayer
+        - Selected
+        - SelectedSetScore
+    - CreatePlayerMenu.cs : MenuView
+        - Create

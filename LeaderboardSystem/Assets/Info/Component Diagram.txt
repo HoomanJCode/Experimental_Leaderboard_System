@@ -1,0 +1,65 @@
++-----------------------------------------------------------------------------------------+
+|                                        Storage Layer                                    |
++-------------------+----------------------------+---------------------------------------+
+| <<component>>      | <<component>>             | <<component>>                         |
+| IStorageAdapter<T> | PhotoFileAdapter          | TextFileAdapter                       |
+| (Interface)        | (Implements               | (Implements                           |
+|                    | IStorageAdapter<byte[]>)  | IStorageAdapter<string>)              |
+| ◀┘Provides         | ◀┘Provides                | ◀┘Provides                            |
+|   - SaveAsync      |   - SaveAsync(byte[])     |   - SaveAsync(string)                 |
+|   - LoadAsync      |   - LoadAsync() → byte[]  |   - LoadAsync() → string              |
+|   - Delete         |                           |                                       |
++-------------------+----------------------------+---------------------------------------+
+           △                                  △
+           |                                  |
+           | Requires                        | Requires
+           |                                  |
++-----------------------------------------------------------------------------------------+
+|                                      Repository Layer                                   |
++-------------------+----------------------------+---------------------------------------+
+| <<component>>      | <<component>>             | <<component>>                         |
+| IPlayerRepository  | IAvatarRepository         | ILeaderboardRepository                |
+| (Interface)        | (Interface)               | (Interface)                           |
+|                    |                            |  - SaveChangesAsync()                 |
+|                    |                            |  - DeleteAsync()                      |
+| ◀┘Provides         | ◀┘Provides                | ◀┘Provides                            |
++-------------------+----------------------------+---------------------------------------+
+           △                   △                   △
+           | Implements        | Implements        | Implements
++-------------------+----------------------------+---------------------------------------+
+| <<component>>      | <<component>>             | <<component>>                         |
+| PlayerRepository   | AvatarRepository          | LeaderboardRepository                 |
+| - Uses             | - Uses                    | - Maintains                           |
+| IStorageAdapter<   | IStorageAdapter<byte[]>   | List<PlayerScore>                     |
+|   string>          |                           |                                       |
++-------------------+----------------------------+---------------------------------------+
+           △                   △                   △
+           |                   |                   |
+           | Requires         | Requires          | Requires
+           |                   |                   |
++-----------------------------------------------------------------------------------------+
+|                                       Service Layer                                    |
++-------------------+----------------------------+---------------------------------------+
+| <<component>>      | <<component>>             | <<component>>                         |
+| PlayersAuthService | <<abstract>>              | MainLeaderboard                       |
+| - Static Instance  | LeaderboardService        | (Concrete implementation              |
+| - Uses             | (MonoBehaviour)           | of LeaderboardService)                |
+| IPlayerRepository  | ◀┘Provides                |                                       |
+|                    |  - SortScoresAsync()      |                                       |
+|                    |  - PushScoreAsync()       |                                       |
+|                    |  - GetHighestScoresAsync()|                                       |
++-------------------+----------------------------+---------------------------------------+
+           △                   △
+           |                   |
+           | Requires         | Requires
+           |                   |
++-----------------------------------------------------------------------------------------+
+|                                         UI Layer                                       |
++-------------------+----------------------------+---------------------------------------+
+| <<component>>      | <<component>>             | <<component>>                         |
+| LeaderboardViewMenu| CreatePlayerMenu          | PlayerLeaderboardRecord               |
+| (MenuView)         | (MenuView)                | (MonoBehaviour)                       |
+| - Uses             | - Uses                    | - Uses                                |
+| MainLeaderboard    | PlayersAuthService        | ILeaderboardService                   |
+|                    |                           | IPlayerRepository                     |
++-------------------+----------------------------+---------------------------------------+

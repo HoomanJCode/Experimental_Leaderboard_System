@@ -1,3 +1,0 @@
-1. AppManager.cs (main entry point)
-2. ServiceLocator.cs (dependency container)
-3. EventManager.cs (central event system)

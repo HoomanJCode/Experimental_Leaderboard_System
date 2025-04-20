@@ -1,0 +1,80 @@
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                                CLASS DIAGRAM                                  │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────┐       ┌──────────────────────────────┐
+│   <<interface>>       │       │   <<interface>>              │
+│   IStorageAdapter<T>  │       │   IPlayerRepository          │
+├───────────────────────┤       ├──────────────────────────────┤
+│ +Exists(): bool       │       │ +AddAsync(player: Player)    │
+│ +SaveAsync(data: T)   │       │ +UpdateAsync(player: Player) │
+│ +LoadAsync(): Task<T> │       │ +GetByIdAsync(id: int)       │
+│ +Delete(): void       │       │ +DeleteAsync(id: int)        │
+└──────────┬────────────┘       │ +SaveChangesAsync()          │
+           △                    └──────────────┬───────────────┘
+           |                                    △
+┌──────────┴────────────┐       ┌──────────────┴───────────────┐
+│ PhotoFileAdapter       │       │ PlayerRepository             │
+├───────────────────────┤       ├──────────────────────────────┤
+│ +SaveAsync(byte[])     │       │ -_storage: IStorageAdapter<T>│
+│ +LoadAsync(): byte[]   │       └──────────────┬───────────────┘
+└───────────────────────┘                      △
+                                               |
+┌───────────────────────┐       ┌──────────────┴───────────────┐
+│ TextFileAdapter       │       │ PlayersAuthenticationService │
+├───────────────────────┤       ├──────────────────────────────┤
+│ +SaveAsync(string)    │       │ +Instance (static)           │
+│ +LoadAsync(): string  │       │ +LoadSingleton()             │
+└───────────────────────┘       │ +AddPlayer()                 │
+                                │ +RemovePlayer()              │
+┌───────────────────────┐       │ +UpdatePlayer()              │
+│ Player                │       │ +GetPlayerById()             │
+├───────────────────────┤       └──────────────┬───────────────┘
+│ +Id: int              │                      △
+│ +Name: string         │                      |
+│ +Description: string  │       ┌──────────────┴───────────────┐
+└───────────────────────┘       │ LeaderboardViewMenu          │
+                                ├──────────────────────────────┤
+┌───────────────────────┐       │ -Leaderboard: LeaderboardService│
+│ PlayerAvatar          │       │ +AddRecord()                 │
+├───────────────────────┤       │ +ClearList()                 │
+│ +PlayerId: int        │       │ +RecreateList()              │
+│ +ProfileImage: byte[] │       └──────────────────────────────┘
+└───────────────────────┘
+                                               △
+┌───────────────────────┐       ┌──────────────┴───────────────┐
+│ PlayerScore           │       │ <<interface>>                │
+├───────────────────────┤       │ ILeaderboardService          │
+│ +PlayerId: int        │       ├──────────────────────────────┤
+│ +Score: int           │       │ +SortScoresAsync()           │
+└───────────────────────┘       │ +PushScoreAsync()            │
+                                │ +GetHighestScoresAsync()     │
+                                └──────────────┬───────────────┘
+                                               △
+                                ┌──────────────┴───────────────┐
+                                │ LeaderboardService           │
+                                │ (abstract, MonoBehaviour)    │
+                                ├──────────────────────────────┤
+                                │ +SortScoresAsync()           │
+                                │ +PushScoreAsync()            │
+                                │ +GetHighestScoresAsync()     │
+                                └──────────────┬───────────────┘
+                                               △
+                                ┌──────────────┴───────────────┐
+                                │ MainLeaderboard              │
+                                ├──────────────────────────────┤
+                                │ -Scores: List<PlayerScore>   │
+                                └──────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                                 RELATIONSHIPS                                  │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 1. PhotoFileAdapter and TextFileAdapter implement IStorageAdapter<T>          │
+│ 2. PlayerRepository implements IPlayerRepository                              │
+│ 3. PlayersAuthenticationService depends on IPlayerRepository                 │
+│ 4. LeaderboardService (abstract) implements ILeaderboardService               │
+│ 5. MainLeaderboard inherits from LeaderboardService                           │
+│ 6. LeaderboardViewMenu depends on LeaderboardService                          │
+│ 7. PlayerLeaderboardRecord manipulates Player/PlayerScore data               │
+│ 8. CreatePlayerMenu depends on PlayersAuthenticationService                   │
+└───────────────────────────────────────────────────────────────────────────────┘
