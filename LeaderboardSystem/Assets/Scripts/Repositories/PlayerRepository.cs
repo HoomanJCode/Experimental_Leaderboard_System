@@ -26,12 +26,7 @@ namespace Repositories
         public async Task<int> AddPlayerAsync(SavePlayerDto playerDto)
         {
             int newId = ++_lastPlayerId;
-            var newPlayer = new Player
-            {
-                Id = newId,
-                Name = playerDto.Name,
-                Description = playerDto.Description
-            };
+            var newPlayer = new Player(newId, playerDto.Name, playerDto.Description);
             Players.Add(newPlayer);
             //todo: add timing save period
             await SaveChangesAsync();
