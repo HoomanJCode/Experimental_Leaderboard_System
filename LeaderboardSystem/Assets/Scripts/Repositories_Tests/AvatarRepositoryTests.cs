@@ -97,8 +97,7 @@ public class AvatarRepositoryTests
     private class TestStorageAdapter : IStorageAdapter<byte[]>
     {
         public Dictionary<string, byte[]> Storage = new();
-
-        public bool Exists(string path) => Storage.ContainsKey(path);
+        public Task<bool> Exists(string filePath) => Task.Run(() => Storage.ContainsKey(filePath));
 
         public Task SaveAsync(string path, byte[] data)
         {
@@ -116,11 +115,14 @@ public class AvatarRepositoryTests
             return null;
         }
 
-        public void Delete(string path)
+        public Task Delete(string path)
         {
             UnityEngine.Debug.Log($"Remove {path}.");
-            if (Storage.ContainsKey(path))
-                Storage.Remove(path);
+            return Task.Run(() =>
+            {
+                if (Storage.ContainsKey(path))
+                    Storage.Remove(path);
+            });
         }
     }
 }

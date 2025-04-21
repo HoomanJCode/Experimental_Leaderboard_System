@@ -7,7 +7,9 @@ namespace Repositories
     {
         Task<int> AddPlayerAsync(SavePlayerDto player);
         Task UpdatePlayerAsync(Player player);
-        Task<Player> GetByIdAsync(int id);
+        Task<Player> GetByIdAsync(int playerId);
+        Task<bool> Exist(int playerId);
         Task SaveChangesAsync();
+        Task DeleteAsync(int playerId);
     }
 }

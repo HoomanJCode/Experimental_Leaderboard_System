@@ -8,10 +8,12 @@ public class PhotoFileAdapterTests
 {
     [Test]
     [Timeout(2000)]
-    public void Exists_ReturnsFalseForNonExistentFile()
+    public IEnumerator Exists_ReturnsFalseForNonExistentFile()
     {
         var adapter = new PhotoFileAdapter();
-        Assert.IsFalse(adapter.Exists("nonexistent_file.dat"));
+        var checkTask = adapter.Exists("nonexistent_file.dat");
+        yield return new WaitUntil(() => checkTask.IsCompleted);
+        Assert.IsFalse(checkTask.Result);
     }
 
     [UnityTest]

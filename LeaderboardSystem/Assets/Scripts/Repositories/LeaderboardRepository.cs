@@ -28,13 +28,13 @@ namespace Repositories
         public async Task DeleteAsync(int playerId)
         {
             var path = Path.Combine(MainPath, LeaderboardKey);
-            if (_storage.Exists(path)) _storage.Delete(path);
+            if (await _storage.Exists(path)) await _storage.Delete(path);
         }
 
         private async Task LoadScores()
         {
             var path=Path.Combine(MainPath, LeaderboardKey);
-            if (_storage.Exists(path))
+            if (await _storage.Exists(path))
             {
                 var data = await _storage.LoadAsync(path);
                 Scores = Deserialize(data) ?? new List<PlayerScore>();

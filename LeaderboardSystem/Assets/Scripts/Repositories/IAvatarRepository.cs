@@ -9,5 +9,6 @@ namespace Repositories
         Task UpdateAsync(PlayerAvatar avatar);
         Task<PlayerAvatar> GetByIdAsync(int playerId);
         Task DeleteAsync(int playerId);
+        Task<bool> HasAvatarAsync(int playerId);
     }
 }
