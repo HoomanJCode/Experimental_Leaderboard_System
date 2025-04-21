@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Repositories",
-        "Storage"
+        "Storage",
+        "Models"
     ],
     "includePlatforms": [
         "Editor"
