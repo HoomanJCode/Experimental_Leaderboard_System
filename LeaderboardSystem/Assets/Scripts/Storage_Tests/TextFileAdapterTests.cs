@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 public class TextFileAdapterTests
 {
 
-    [Test]
+    [UnityTest]
     [Timeout(2000)]
     public IEnumerator Exists_ReturnsFalseForNonExistentFile()
     {
@@ -46,16 +46,16 @@ public class TextFileAdapterTests
         File.Delete(testFilePath);
     }
 
-    [Test]
+    [UnityTest]
     [Timeout(2000)]
-    public void Delete_RemovesFile()
+    public IEnumerator Delete_RemovesFile()
     {
         var adapter = new TextFileAdapter();
         var testFilePath = Path.Combine(Application.persistentDataPath, nameof(TextFileAdapterTests) + "." + nameof(Delete_RemovesFile) + ".dat");
         var testTextData = "This is a test string with some content.";
 
         File.WriteAllText(testFilePath, testTextData);
-        adapter.Delete(testFilePath);
+        yield return adapter.Delete(testFilePath);
         Assert.IsFalse(File.Exists(testFilePath));
         File.Delete(testFilePath);
     }

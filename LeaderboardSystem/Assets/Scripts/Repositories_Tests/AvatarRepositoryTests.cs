@@ -97,7 +97,7 @@ public class AvatarRepositoryTests
     private class TestStorageAdapter : IStorageAdapter<byte[]>
     {
         public Dictionary<string, byte[]> Storage = new();
-        public Task<bool> Exists(string filePath) => Task.Run(() => Storage.ContainsKey(filePath));
+        public Task<bool> Exists(string filePath) => Task.FromResult( Storage.ContainsKey(filePath));
 
         public Task SaveAsync(string path, byte[] data)
         {

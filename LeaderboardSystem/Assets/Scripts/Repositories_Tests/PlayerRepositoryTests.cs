@@ -99,7 +99,7 @@ public class PlayerRepositoryTests
     {
         public Dictionary<string, string> Storage = new();
 
-        public Task<bool> Exists(string filePath) => Task.Run(() => Storage.ContainsKey(filePath));
+        public Task<bool> Exists(string filePath) => Task.FromResult(Storage.ContainsKey(filePath));
 
         public Task SaveAsync(string path, string data)
         {
