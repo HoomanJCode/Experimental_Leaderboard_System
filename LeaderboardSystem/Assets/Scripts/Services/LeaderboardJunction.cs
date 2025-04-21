@@ -3,8 +3,8 @@ using UnityEngine;
 public abstract class LeaderboardJunction : MonoBehaviour
 {
     public LeaderboardService Service { get; set; }
-    protected virtual void Awake()
+    protected void Setup(string leaderboardName)
     {
-        Service = new LeaderboardService(nameof(MainLeaderboardJunction));
+        Service = new LeaderboardService(leaderboardName);
     }
 }

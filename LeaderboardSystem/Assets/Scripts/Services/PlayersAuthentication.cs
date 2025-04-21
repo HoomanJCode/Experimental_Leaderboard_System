@@ -13,7 +13,7 @@ namespace Services
         /// <summary>
         /// Adds a new player to the system
         /// </summary>
-        public static async Task RegisterPlayer(string name, string description, Texture2D avatar)=>
+        public static async Task<Player> RegisterPlayer(string name, string description, Texture2D avatar=null)=>
         await _instance.RegisterPlayer(name, description, avatar);
 
         /// <summary>

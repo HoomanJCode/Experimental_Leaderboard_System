@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using System.Linq;
+using UnityEngine;
 
 namespace Repositories
 {
@@ -14,12 +15,14 @@ namespace Repositories
         private string StorageKey => nameof(PlayerRepository);
         private string LastIdStorageKey => $"{StorageKey}_LastId";
         private readonly IStorageAdapter<string> _storage = new TextFileAdapter();
-        private string MainPath { get; set; } = "C:\\..."; 
+        private string MainPath { get; set; } = Path.Combine(Application.persistentDataPath, "Profiles");
         private int _lastPlayerId;
         public List<Player> Players { get; private set; } = new List<Player>();
 
         public PlayerRepository()
         {
+            if (!Directory.Exists(MainPath))
+                Directory.CreateDirectory(MainPath);
             LoadPlayers().ConfigureAwait(false);
         }
         public PlayerRepository(string mainPath,IStorageAdapter<string> storage)

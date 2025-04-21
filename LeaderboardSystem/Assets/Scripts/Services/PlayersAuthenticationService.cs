@@ -24,13 +24,14 @@ namespace Services
         /// <summary>
         /// Adds a new player to the system
         /// </summary>
-        public async Task RegisterPlayer(string name,string description,Texture2D avatar)
+        public async Task<Player> RegisterPlayer(string name,string description,Texture2D avatar)
         {
             var addedPlayerId = await _playerRepository.AddPlayerAsync(new SavePlayerDto(name,description));
             if (avatar != null)
                 await _avatarRepository.AddAsync(new PlayerAvatar(addedPlayerId,avatar.GetRawTextureData()));
 
             await _playerRepository.SaveChangesAsync();
+            return new Player(addedPlayerId, name, description);
         }
 
         /// <summary>
