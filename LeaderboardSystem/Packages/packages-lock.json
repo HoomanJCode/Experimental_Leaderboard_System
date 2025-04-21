@@ -308,6 +308,13 @@
       },
       "url": "https://packages.unity.com"
     },
+    "indie.hoomanjcode.menu-views": {
+      "version": "https://github.com/HoomanJCode/MenuView-Package.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "f42c84388aaa219ce7649c2c528ef6ccb8e1e8cc"
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
