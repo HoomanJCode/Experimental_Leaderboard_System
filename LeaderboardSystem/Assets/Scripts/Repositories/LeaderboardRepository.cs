@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Repositories
 {
-    public class LeaderboardRepository : ILeaderboardRepository
+    public abstract class LeaderboardRepository : ILeaderboardRepository
     {
         private readonly IStorageAdapter<string> _storage = new TextFileAdapter();
         private readonly string LeaderboardKey;
