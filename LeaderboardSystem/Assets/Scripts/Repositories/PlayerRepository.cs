@@ -49,10 +49,9 @@ namespace Repositories
             await SaveChangesAsync();
         }
 
-        public async Task<Player> GetByIdAsync(int id)
+        public async Task<Player> GetByIdAsync(int playerId)
         {
-            var player = Players.FirstOrDefault(p => p.Id == id);
-            return player;
+            return await Task.Run(()=> Players.FirstOrDefault(p => p.Id == playerId));
         }
 
         public async Task SaveChangesAsync()
@@ -64,13 +63,13 @@ namespace Repositories
         private async Task LoadPlayers()
         {
             var path = Path.Combine(MainPath, StorageKey);
-            if (_storage.Exists(path))
+            if (await _storage.Exists(path))
             {
                 var data = await _storage.LoadAsync(path);
                 Players = Deserialize(data) ?? new List<Player>();
             }
             var path2 = Path.Combine(MainPath, LastIdStorageKey);
-            if (_storage.Exists(path2))
+            if (await _storage.Exists(path2))
             {
                 var data = await _storage.LoadAsync(path2);
                 _lastPlayerId= int.TryParse(data, out var id) ? id : 0;
@@ -82,5 +81,15 @@ namespace Repositories
 
         private List<Player> Deserialize(string data) => JsonConvert.DeserializeObject<List<Player>>(data);
 
+        //todo: design tests for it
+        public Task DeleteAsync(int playerId)
+        {
+            if (!Players.Exists(p => p.Id == playerId)) throw new InvalidOperationException();
+            Players.RemoveAll(p => p.Id == playerId);
+            return Task.CompletedTask;
+        }
+
+        //todo: design tests for it
+        public Task<bool> Exist(int playerId) => Task.Run(()=>Players.Exists(x=>x.Id==playerId));
     }
 }

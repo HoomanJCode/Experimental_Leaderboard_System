@@ -25,7 +25,7 @@ namespace Repositories
         public async Task AddAsync(PlayerAvatar avatar)
         {
             var path = Path.Combine(MainPath, avatar.PlayerId.ToString());
-            if (_storage.Exists(path))
+            if (await _storage.Exists(path))
                 throw new InvalidOperationException($"Avatar for player {avatar.PlayerId} already exists");
 
             await _storage.SaveAsync(path, avatar.ProfileImage);
@@ -34,7 +34,7 @@ namespace Repositories
         public async Task UpdateAsync(PlayerAvatar avatar)
         {
             var path = Path.Combine(MainPath, avatar.PlayerId.ToString());
-            if (!_storage.Exists(path))
+            if (!await _storage.Exists(path))
                 throw new InvalidOperationException($"Avatar for player {avatar.PlayerId} not found");
 
             await _storage.SaveAsync(path, avatar.ProfileImage);
@@ -43,7 +43,7 @@ namespace Repositories
         public async Task<PlayerAvatar> GetByIdAsync(int playerId)
         {
             var path = Path.Combine(MainPath, playerId.ToString());
-            if (!_storage.Exists(path)) return null;
+            if (!await _storage.Exists(path)) return null;
             var imageData = await _storage.LoadAsync(path);
             return new PlayerAvatar(playerId, imageData);
         }
@@ -51,8 +51,15 @@ namespace Repositories
         public async Task DeleteAsync(int playerId)
         {
             var path = Path.Combine(MainPath, playerId.ToString());
-            if (!_storage.Exists(path)) throw new InvalidOperationException("Player Not Exist!");
-            _storage.Delete(path);
+            if (!await _storage.Exists(path)) throw new InvalidOperationException("Player Not Exist!");
+            await _storage.Delete(path);
+        }
+
+        //todo: design tests for it
+        public Task<bool> HasAvatarAsync(int playerId)
+        {
+            var path = Path.Combine(MainPath, playerId.ToString());
+            return _storage.Exists(path);
         }
     }
 }
