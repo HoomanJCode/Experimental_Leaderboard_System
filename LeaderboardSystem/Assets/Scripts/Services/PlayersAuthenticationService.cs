@@ -8,33 +8,18 @@ namespace Services
 {
     public class PlayersAuthenticationService
     {
-        // Singleton instance
-        private static PlayersAuthenticationService _instance;
-        public static PlayersAuthenticationService Instance => _instance ??= new PlayersAuthenticationService();
-
         // Dependencies
         private readonly IPlayerRepository _playerRepository;
         private readonly IAvatarRepository _avatarRepository;
 
         // Private constructor for singleton
-        private PlayersAuthenticationService()
+        public PlayersAuthenticationService()
         {
             // Initialize repositories (could be injected via DI in a real scenario)
             _playerRepository = new PlayerRepository();
             _avatarRepository = new AvatarRepository();
         }
 
-        /// <summary>
-        /// Loads the singleton instance and initializes dependencies
-        /// </summary>
-        public static void LoadSingleton()
-        {
-            if (_instance == null)
-            {
-                _instance = new PlayersAuthenticationService();
-                Debug.Log("PlayersAuthenticationService singleton loaded successfully.");
-            }
-        }
 
         /// <summary>
         /// Adds a new player to the system
@@ -90,6 +75,7 @@ namespace Services
         /// Retrieves a player by their ID
         /// </summary>
         public async Task<Player> GetPlayerById(int playerId) => await _playerRepository.GetByIdAsync(playerId);
+        public async Task<bool> PlayerExist(int playerId) => await _playerRepository.Exist(playerId);
         public async Task<PlayerAvatar> GetPlayerAvatarById(int playerId) => await _avatarRepository.GetByIdAsync(playerId);
     }
 }
