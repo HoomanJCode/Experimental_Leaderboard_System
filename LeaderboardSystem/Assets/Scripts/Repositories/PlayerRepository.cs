@@ -14,13 +14,19 @@ namespace Repositories
         private string StorageKey => nameof(PlayerRepository);
         private string LastIdStorageKey => $"{StorageKey}_LastId";
         private readonly IStorageAdapter<string> _storage = new TextFileAdapter();
-        private string MainPath => "C:\\..."; 
+        private string MainPath { get; set; } = "C:\\..."; 
         private int _lastPlayerId;
         public List<Player> Players { get; private set; } = new List<Player>();
 
         public PlayerRepository()
         {
-            LoadScores().ConfigureAwait(false);
+            LoadPlayers().ConfigureAwait(false);
+        }
+        public PlayerRepository(string mainPath,IStorageAdapter<string> storage)
+        {
+            _storage = storage;
+            MainPath = mainPath;
+            LoadPlayers().ConfigureAwait(false);
         }
 
         public async Task<int> AddPlayerAsync(SavePlayerDto playerDto)
@@ -37,9 +43,7 @@ namespace Repositories
         {
             var existingPlayer = Players.FirstOrDefault(p => p.Id == player.Id);
             if (existingPlayer == null)
-            {
-                throw new KeyNotFoundException($"Player with ID {player.Id} not found.");
-            }
+                throw new InvalidOperationException($"Player with ID {player.Id} not found.");
             existingPlayer.Name = player.Name;
             existingPlayer.Description = player.Description;
             await SaveChangesAsync();
@@ -57,7 +61,7 @@ namespace Repositories
             await _storage.SaveAsync(Path.Combine(MainPath, LastIdStorageKey), _lastPlayerId.ToString());
         }
 
-        private async Task LoadScores()
+        private async Task LoadPlayers()
         {
             var path = Path.Combine(MainPath, StorageKey);
             if (_storage.Exists(path))
