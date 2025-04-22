@@ -16,7 +16,9 @@ public class PlayerProfileMenu : MenuView
     [SerializeField]
     private TMP_InputField score;
     [SerializeField]
-    private Button SubmitBtn;
+    private Button RegisterBtn;
+    [SerializeField]
+    private Button UpdateBtn;
     [SerializeField]
     private Button BackBtn;
     [SerializeField]
@@ -34,6 +36,8 @@ public class PlayerProfileMenu : MenuView
                 Score = 0;
             }
             DeletePlayerBtn.gameObject.SetActive(!value);
+            UpdateBtn.gameObject.SetActive(!value);
+            RegisterBtn.gameObject.SetActive(!value);
             _createMode = value;
         }
     }
@@ -53,14 +57,20 @@ public class PlayerProfileMenu : MenuView
             await PlayersAuthentication.RemovePlayer(PlayerId);
             GetView<LeaderboardViewMenu>().ChangeToThisView();
         });
-        SubmitBtn.onClick.AddListener(async () =>
+        RegisterBtn.onClick.AddListener(async () =>
         {
-            if (CreateMode)
-            {
-                var player =await PlayersAuthentication.RegisterPlayer(Name, Description);
-                await leaderboardJunc.Service.PushScoreAsync(new PlayerScore(player.Id, Score));
-            }
+            var player =await PlayersAuthentication.RegisterPlayer(Name, Description);
+            //todo: submit avatar
+            await leaderboardJunc.Service.PushScoreAsync(new PlayerScore(player.Id, Score));
             GetView<LeaderboardViewMenu>().ChangeToThisView();
         });
+        UpdateBtn.onClick.AddListener(async () =>
+        {
+            var player =await PlayersAuthentication.UpdatePlayer(PlayerId,Name, Description);
+            //todo: update avatar
+            await leaderboardJunc.Service.PushScoreAsync(new PlayerScore(PlayerId, Score));
+            GetView<LeaderboardViewMenu>().ChangeToThisView();
+        });
+        CreateMode = true;
     }
 }

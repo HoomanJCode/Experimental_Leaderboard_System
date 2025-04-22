@@ -25,7 +25,9 @@ public class LeaderboardService : LeaderboardRepository, ILeaderboardService
     {
         if (!await PlayersAuthentication.PlayerExist(score.PlayerId))
             throw new InvalidOperationException("Player Not Exist!");
-        Scores.Add(score);
+        var lastScore = Scores.Find(x=>x.PlayerId==score.PlayerId);
+        if (lastScore == null) Scores.Add(score);
+        else lastScore.Score = score.Score;
         await SortScoresAsync();
     }
     public async Task DeleteScoreAsync(int playerId)
