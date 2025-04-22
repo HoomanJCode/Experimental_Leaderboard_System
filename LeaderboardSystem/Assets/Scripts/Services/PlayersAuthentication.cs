@@ -23,7 +23,7 @@ namespace Services
         /// <summary>
         /// Updates an existing player
         /// </summary>
-        public static async Task<bool> UpdatePlayer(Player player) => await Instance.UpdatePlayer(player);
+        public static async Task<bool> UpdatePlayer(int playerId, string name, string description) => await Instance.UpdatePlayer(playerId,name,description);
         /// <summary>
         /// Updates an existing player Avatar
         /// </summary>

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -18,8 +19,8 @@ public class PlayerLeaderboardRecord : MonoBehaviour
     private Sprite defaultAvatar;
     private static readonly List<PlayerLeaderboardRecord> AllRecords =new();
 
-    public UnityAction DeleteAction { get; set; }
-    public UnityAction EditAction { get; set; }
+    public Action DeleteAction { get; set; }
+    public Action EditAction { get; set; }
 
     public void SetPlayer(int index,string name,Sprite avatar)
     {
@@ -45,8 +46,8 @@ public class PlayerLeaderboardRecord : MonoBehaviour
         });
         SetSelectedMode(false);
         defaultAvatar = avatar.sprite;
-        DeleteBtn.onClick.AddListener(DeleteAction);
-        EditBtn.onClick.AddListener(EditAction);
+        DeleteBtn.onClick.AddListener(()=> DeleteAction());
+        EditBtn.onClick.AddListener(() => EditAction());
     }
     private void OnDestroy()
     {

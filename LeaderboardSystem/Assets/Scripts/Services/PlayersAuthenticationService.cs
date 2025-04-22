@@ -50,10 +50,9 @@ namespace Services
         /// <summary>
         /// Updates an existing player
         /// </summary>
-        public async Task<bool> UpdatePlayer(Player player)
+        public async Task<bool> UpdatePlayer(int playerId,string name,string description)
         {
-            if (player == null)
-            throw new ArgumentNullException(nameof(player));
+            var player = new Player(playerId,name,description);
             if (!await _playerRepository.Exist(player.Id)) return false;
             await _playerRepository.UpdatePlayerAsync(player);
             await _playerRepository.SaveChangesAsync();
