@@ -1,39 +1,87 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Repositories.Models;
 using Repositories;
-using System.Diagnostics;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 [TestFixture]
 public class AvatarRepositoryTests
 {
     private IAvatarRepository _repository;
-    private readonly PlayerAvatar _testAvatar = new(1, new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 });
+    private TestStorageAdapter _testStorage;
+    private Sprite _testSprite;
+    private Texture2D _testTexture;
 
     [SetUp]
     public void Setup()
     {
-        _repository = new AvatarRepository("TestPath",new TestStorageAdapter());
+        _testStorage = new TestStorageAdapter();
+        _repository = new AvatarRepository("TestPath", _testStorage);
+
+        // Create a test sprite
+        _testTexture = new Texture2D(2, 2);
+        _testTexture.SetPixels(new Color[] { Color.red, Color.green, Color.blue, Color.white });
+        _testTexture.Apply();
+        _testSprite = Sprite.Create(_testTexture, new Rect(0, 0, 2, 2), Vector2.one * 0.5f);
+    }
+
+    [TearDown]
+    public void Teardown()
+    {
+        if (_testTexture != null)
+            UnityEngine.Object.DestroyImmediate(_testTexture);
     }
 
     [Test]
-    [Timeout(2000)]
-    public async Task AddAsync_ShouldStoreAvatar()
+    public async Task AddOrUpdateAsync_ShouldStoreAvatar()
     {
         // Act
-        await _repository.AddAsync(_testAvatar);
+        await _repository.AddOrUpdateAsync(1, _testSprite);
 
         // Assert
-        var retrieved = await _repository.GetByIdAsync(_testAvatar.PlayerId);
+        var retrieved = await _repository.GetByIdAsync(1);
         Assert.IsNotNull(retrieved);
-        Assert.AreEqual(_testAvatar.PlayerId, retrieved.PlayerId);
-        Assert.AreEqual(_testAvatar.ProfileImage, retrieved.ProfileImage);
+        Assert.AreEqual(_testSprite.texture.width, retrieved.texture.width);
+        Assert.AreEqual(_testSprite.texture.height, retrieved.texture.height);
     }
 
     [Test]
-    [Timeout(2000)]
+    public async Task AddOrUpdateAsync_ShouldUpdateCache()
+    {
+        // Arrange
+        await _repository.AddOrUpdateAsync(1, _testSprite);
+
+        // Act
+        var newSprite = Sprite.Create(new Texture2D(2, 2), new Rect(0, 0, 2, 2), Vector2.one * 0.5f);
+        await _repository.AddOrUpdateAsync(1, newSprite);
+
+        // Assert
+        var cachedSprite = await _repository.GetByIdAsync(1);
+        Assert.AreSame(newSprite.texture, cachedSprite.texture);
+
+        // Cleanup
+        UnityEngine.Object.DestroyImmediate(newSprite.texture);
+    }
+
+    [Test]
+    public async Task GetByIdAsync_ShouldReturnCachedAvatar()
+    {
+        // Arrange
+        await _repository.AddOrUpdateAsync(1, _testSprite);
+        _testStorage.Storage.Clear(); // Clear storage to prove we're using cache
+
+        // Act
+        var result = await _repository.GetByIdAsync(1);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.AreEqual(_testSprite.texture.width, result.texture.width);
+    }
+
+    [Test]
     public async Task GetByIdAsync_ShouldReturnNullForNonExistentPlayer()
     {
         // Act
@@ -42,87 +90,112 @@ public class AvatarRepositoryTests
         // Assert
         Assert.IsNull(result);
     }
-
     [Test]
-    [Timeout(2000)]
-    public async Task UpdateAsync_ShouldModifyExistingAvatar()
+    public async Task GetByIdAsync_ShouldLoadFromStorageWhenNotCached()
     {
         // Arrange
-        await _repository.AddAsync(_testAvatar);
-        var updatedAvatar = new PlayerAvatar(_testAvatar.PlayerId, new byte[] { 0x02, 0x02, 0x03, 0x05, 0x05 });
+        var bytes = SpriteUtilities.SpriteToByte(_testSprite);
+        // Store using the same path format the repository uses
+        var expectedPath = Path.Combine("TestPath", "1");
+        await _testStorage.SaveAsync(expectedPath, bytes);
 
         // Act
-        await _repository.UpdateAsync(updatedAvatar);
+        var result = await _repository.GetByIdAsync(1);
 
         // Assert
-        var retrieved = await _repository.GetByIdAsync(_testAvatar.PlayerId);
-        Assert.AreEqual(updatedAvatar.ProfileImage, retrieved.ProfileImage);
+        Assert.IsNotNull(result, "Should load sprite from storage when not in cache");
+        Assert.AreEqual(_testSprite.texture.width, result.texture.width, "Loaded sprite should match original dimensions");
     }
 
     [Test]
-    [Timeout(2000)]
-    public void UpdateAsync_ShouldThrowForNonExistentPlayer()
+    public async Task DeleteAsync_ShouldRemoveAvatarFromCacheAndStorage()
     {
         // Arrange
-        var nonExistentAvatar = new PlayerAvatar { PlayerId = 999 };
-
-        // Act & Assert
-        Assert.ThrowsAsync<InvalidOperationException>(() => _repository.UpdateAsync(nonExistentAvatar));
-    }
-
-    [Test]
-    [Timeout(2000)]
-    public async Task DeleteAsync_ShouldRemoveAvatar()
-    {
-        // Arrange
-        await _repository.AddAsync(_testAvatar);
+        await _repository.AddOrUpdateAsync(1, _testSprite);
 
         // Act
-        await _repository.DeleteAsync(_testAvatar.PlayerId);
+        await _repository.DeleteAsync(1);
 
         // Assert
-        var retrieved = await _repository.GetByIdAsync(_testAvatar.PlayerId);
-        Assert.IsNull(retrieved);
+        Assert.IsFalse(_testStorage.Storage.ContainsKey("TestPath/1"));
+        Assert.IsNull(await _repository.GetByIdAsync(1));
     }
 
     [Test]
-    [Timeout(2000)]
     public void DeleteAsync_ShouldThrowForNonExistentPlayer()
     {
         // Act & Assert
-        Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _repository.DeleteAsync(999));
+        Assert.ThrowsAsync<InvalidOperationException>(() => _repository.DeleteAsync(999));
+    }
+
+    [Test]
+    public async Task HasAvatarAsync_ShouldReturnTrueForCachedAvatar()
+    {
+        // Arrange
+        await _repository.AddOrUpdateAsync(1, _testSprite);
+        _testStorage.Storage.Clear(); // Clear storage to prove we're using cache
+
+        // Act
+        var result = await _repository.HasAvatarAsync(1);
+
+        // Assert
+        Assert.IsTrue(result);
+    }
+
+    [Test]
+    public async Task HasAvatarAsync_ShouldCheckStorageWhenNotCached()
+    {
+        // Arrange
+        var bytes = SpriteUtilities.SpriteToByte(_testSprite);
+        // Store using the same path format the repository uses
+        var expectedPath = Path.Combine("TestPath", "1");
+        await _testStorage.SaveAsync(expectedPath, bytes);
+
+        // Act
+        var result = await _repository.HasAvatarAsync(1);
+
+        // Assert
+        Assert.IsTrue(result, "Should find avatar in storage when not in cache");
+    }
+
+    [Test]
+    public async Task HasAvatarAsync_ShouldReturnFalseForNonExistentPlayer()
+    {
+        // Act
+        var result = await _repository.HasAvatarAsync(999);
+
+        // Assert
+        Assert.IsFalse(result);
     }
 
     private class TestStorageAdapter : IStorageAdapter<byte[]>
     {
         public Dictionary<string, byte[]> Storage = new();
-        public Task<bool> Exists(string filePath) => Task.FromResult( Storage.ContainsKey(filePath));
+
+        public Task<bool> Exists(string filePath)
+        {
+            return Task.FromResult(Storage.ContainsKey(filePath));
+        }
 
         public Task SaveAsync(string path, byte[] data)
         {
-            if (Storage.ContainsKey(path)) Storage[path] = data;
-            else Storage.Add(path, data);
-            UnityEngine.Debug.Log($"{path} Stored.");
+            Storage[path] = data;
             return Task.CompletedTask;
         }
 
         public Task<byte[]> LoadAsync(string path)
         {
-            UnityEngine.Debug.Log($"Requested {path}.");
-            if (Storage.ContainsKey(path))
-                return Task.FromResult(Storage[path]);
-            return null;
+            if (Storage.TryGetValue(path, out var data))
+            {
+                return Task.FromResult(data);
+            }
+            return Task.FromResult<byte[]>(null);
         }
 
         public Task Delete(string path)
         {
-            UnityEngine.Debug.Log($"Remove {path}.");
-            return Task.Run(() =>
-            {
-                if (Storage.ContainsKey(path))
-                    Storage.Remove(path);
-            });
+            Storage.Remove(path);
+            return Task.CompletedTask;
         }
     }
 }

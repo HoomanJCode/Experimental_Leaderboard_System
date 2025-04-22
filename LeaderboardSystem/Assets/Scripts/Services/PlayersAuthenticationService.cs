@@ -24,11 +24,11 @@ namespace Services
         /// <summary>
         /// Adds a new player to the system
         /// </summary>
-        public async Task<Player> RegisterPlayer(string name,string description,Texture2D avatar=null)
+        public async Task<Player> RegisterPlayer(string name,string description,Sprite avatar=null)
         {
             var addedPlayerId = await _playerRepository.AddPlayerAsync(new SavePlayerDto(name,description));
             if (avatar != null)
-                await _avatarRepository.AddAsync(new PlayerAvatar(addedPlayerId,avatar.GetRawTextureData()));
+                await _avatarRepository.AddOrUpdateAsync(addedPlayerId, avatar);
 
             //await _playerRepository.SaveChangesAsync();
             return new Player(addedPlayerId, name, description);
@@ -61,13 +61,13 @@ namespace Services
         /// <summary>
         /// Updates an existing player Avatar
         /// </summary>
-        public async Task<bool> UpdatePlayerAvatar(PlayerAvatar avatar)
+        public async Task<bool> UpdatePlayerAvatar(int playerid,Sprite avatar)
         {
             if (avatar == null)
             throw new ArgumentNullException(nameof(avatar));
-            if (!await _playerRepository.Exist(avatar.PlayerId)) return false;
-            if (await _avatarRepository.HasAvatarAsync(avatar.PlayerId))
-                await _avatarRepository.UpdateAsync(avatar);
+            if (!await _playerRepository.Exist(playerid)) return false;
+            if (await _avatarRepository.HasAvatarAsync(playerid))
+                await _avatarRepository.AddOrUpdateAsync(playerid, avatar);
             return true;
         }
 
@@ -76,6 +76,6 @@ namespace Services
         /// </summary>
         public async Task<Player> GetPlayerById(int playerId) => await _playerRepository.GetByIdAsync(playerId);
         public async Task<bool> PlayerExist(int playerId) => await _playerRepository.Exist(playerId);
-        public async Task<PlayerAvatar> GetPlayerAvatarById(int playerId) => await _avatarRepository.GetByIdAsync(playerId);
+        public async Task<Sprite> GetPlayerAvatarById(int playerId) => await _avatarRepository.GetByIdAsync(playerId);
     }
 }

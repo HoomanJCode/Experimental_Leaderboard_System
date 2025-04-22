@@ -1,13 +1,13 @@
 using System.Threading.Tasks;
 using Repositories.Models;
+using UnityEngine;
 
 namespace Repositories
 {
     public interface IAvatarRepository
     {
-        Task AddAsync(PlayerAvatar avatar);
-        Task UpdateAsync(PlayerAvatar avatar);
-        Task<PlayerAvatar> GetByIdAsync(int playerId);
+        Task AddOrUpdateAsync(int playerId,Sprite avatarSprite);
+        Task<Sprite> GetByIdAsync(int playerId);
         Task DeleteAsync(int playerId);
         Task<bool> HasAvatarAsync(int playerId);
     }

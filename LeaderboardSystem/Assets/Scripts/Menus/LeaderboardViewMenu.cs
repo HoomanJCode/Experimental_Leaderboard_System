@@ -54,14 +54,6 @@ public class LeaderboardViewMenu : MenuView
     }
     private IEnumerator RefreshLeaderboard()
     {
-        if(leaderboardJunc.Service.Scores.Count==0) 
-        for (var i = 0; i < 20; i++)
-        {
-            var addPlayerTask = PlayersAuthentication.RegisterPlayer($"Player {i}", $"Desc{i}");
-            yield return new WaitUntil(() => addPlayerTask.IsCompleted);
-            yield return leaderboardJunc.Service.PushScoreAsync(new PlayerScore(addPlayerTask.Result.Id, Random.Range(1, 1000)));
-        }
-
         yield return leaderboardJunc.Service.SortScoresAsync();
         var trashRecordsCount = allRecords.Count-leaderboardJunc.Service.Scores.Count;
         int recordIndex = 0;
@@ -70,7 +62,7 @@ public class LeaderboardViewMenu : MenuView
             var getPlayerTask=PlayersAuthentication.GetPlayerById(item.PlayerId);
             var getAvatarTask = PlayersAuthentication.GetPlayerAvatarById(item.PlayerId);
             yield return new WaitUntil(() => getPlayerTask.IsCompleted);
-            var avatar = getAvatarTask.Result==null? null: SpriteConverter.BytesToSprite(getAvatarTask.Result.ProfileImage);
+            var avatar = getAvatarTask.Result==null? null: getAvatarTask.Result;
             yield return new WaitUntil(() => getAvatarTask.IsCompleted);
             PlayerLeaderboardRecord record;
             if (allRecords.Count > recordIndex)
