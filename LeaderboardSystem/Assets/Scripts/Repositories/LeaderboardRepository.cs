@@ -28,7 +28,7 @@ namespace Repositories
             await _storage.SaveAsync(Path.Combine(MainPath, LeaderboardKey), Serialize());
         }
 
-        public async Task DeleteAsync(int playerId)
+        public async Task DeleteAsync()
         {
             var path = Path.Combine(MainPath, LeaderboardKey);
             if (await _storage.Exists(path)) await _storage.Delete(path);

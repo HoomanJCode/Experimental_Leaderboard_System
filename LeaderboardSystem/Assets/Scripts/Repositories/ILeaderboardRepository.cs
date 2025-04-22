@@ -5,6 +5,6 @@ namespace Repositories
     public interface ILeaderboardRepository
     {
         Task SaveChangesAsync();
-        Task DeleteAsync(int playerId);
+        Task DeleteAsync();
     }
 }
