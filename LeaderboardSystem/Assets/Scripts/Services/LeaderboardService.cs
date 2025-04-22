@@ -28,7 +28,10 @@ public class LeaderboardService : LeaderboardRepository, ILeaderboardService
         Scores.Add(score);
         await SortScoresAsync();
     }
-
+    public async Task DeleteScoreAsync(int playerId)
+    {
+        await Task.Run(()=> Scores.RemoveAll(x => x.PlayerId == playerId));
+    }
     public async Task<List<PlayerScore>> GetHighestScoresAsync(int count)
     {
         await SortScoresAsync();

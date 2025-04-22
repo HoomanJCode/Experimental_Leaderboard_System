@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CreatePlayerMenu : MenuView
+public class PlayerProfileMenu : MenuView
 {
     [SerializeField]
     private LeaderboardJunction leaderboardJunc;
@@ -19,6 +19,8 @@ public class CreatePlayerMenu : MenuView
     private Button SubmitBtn;
     [SerializeField]
     private Button BackBtn;
+    [SerializeField]
+    private Button DeletePlayerBtn;
     private bool _createMode;
     public bool CreateMode {
         get => _createMode;
@@ -31,6 +33,7 @@ public class CreatePlayerMenu : MenuView
                 Description = "";
                 Score = 0;
             }
+            DeletePlayerBtn.gameObject.SetActive(!value);
             _createMode = value;
         }
     }
@@ -42,6 +45,12 @@ public class CreatePlayerMenu : MenuView
     {
         BackBtn.onClick.AddListener(() =>
         {
+            GetView<LeaderboardViewMenu>().ChangeToThisView();
+        });
+        DeletePlayerBtn.onClick.AddListener(async () =>
+        {
+            await leaderboardJunc.Service.DeleteScoreAsync(PlayerId);
+            await PlayersAuthentication.RemovePlayer(PlayerId);
             GetView<LeaderboardViewMenu>().ChangeToThisView();
         });
         SubmitBtn.onClick.AddListener(async () =>
