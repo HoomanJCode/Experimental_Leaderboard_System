@@ -1,0 +1,21 @@
++----------------------------+
+|       Test Pyramid          |
++----------------------------+
+|          UI Tests          |  (End-to-End)
+|  - LeaderboardViewMenu     |
+|  - CreatePlayerMenu        |
+|  - PlayerLeaderboardRecord |
++------------△---------------+
+             |
+|  Integration Tests        |
+|  - Repository+Storage     |
+|  - Service+Repositories   |
+|  - Service+UI Components  |
++------------△---------------+
+             |
+|         Unit Tests         |  (Isolated)
+|  - Storage Adapters       |
+|  - Repository Classes      |
+|  - Service Logic          |
+|  - Domain Models           |
++----------------------------+

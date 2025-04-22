@@ -1,0 +1,56 @@
+sequenceDiagram
+    participant User
+    participant CreatePlayerMenu as UI: CreatePlayerMenu
+    participant AuthService as Service: PlayersAuthenticationService
+    participant PlayerRepo as Repository: PlayerRepository
+    participant TextAdapter as Storage: TextFileAdapter
+    participant AvatarRepo as Repository: AvatarRepository
+    participant PhotoAdapter as Storage: PhotoFileAdapter
+    participant LeaderboardUI as UI: LeaderboardViewMenu
+    participant LeaderboardService as Service: MainLeaderboard
+    participant LeaderboardRepo as Repository: LeaderboardRepository
+
+    User->>+CreatePlayerMenu: Enter Details & Submit
+    CreatePlayerMenu->>+AuthService: AddPlayer(name, description)
+    AuthService->>+PlayerRepo: AddAsync(new Player)
+    PlayerRepo->>+TextAdapter: SaveAsync(playerId, serializedData)
+    TextAdapter-->>-PlayerRepo: Save confirmation
+    PlayerRepo-->>-AuthService: Player created
+    AuthService-->>-CreatePlayerMenu: Success response
+
+    User->>+CreatePlayerMenu: Upload Avatar Image
+    CreatePlayerMenu->>+AuthService: UpdatePlayerAvatar(playerId, imageBytes)
+    AuthService->>+AvatarRepo: UpdateAsync(playerId, imageBytes)
+    AvatarRepo->>+PhotoAdapter: SaveAsync(playerId, byteData)
+    PhotoAdapter-->>-AvatarRepo: Save confirmation
+    AvatarRepo-->>-AuthService: Avatar updated
+    AuthService-->>-CreatePlayerMenu: Success response
+
+    User->>+LeaderboardUI: Submit Score
+    LeaderboardUI->>+LeaderboardService: PushScoreAsync(playerId, score)
+    LeaderboardService->>+LeaderboardRepo: SaveChangesAsync(new PlayerScore)
+    LeaderboardRepo->>+TextAdapter: SaveAsync(scoreId, serializedScore)
+    TextAdapter-->>-LeaderboardRepo: Save confirmation
+    LeaderboardRepo-->>-LeaderboardService: Score saved
+    LeaderboardService-->>-LeaderboardUI: Score accepted
+
+    User->>+LeaderboardUI: Refresh Leaderboard
+    LeaderboardUI->>+LeaderboardService: GetHighestScoresAsync()
+    LeaderboardService->>+LeaderboardRepo: GetAllScores()
+    LeaderboardRepo->>+TextAdapter: LoadAsync(allScores)
+    TextAdapter-->>-LeaderboardRepo: Serialized scores
+    LeaderboardRepo-->>-LeaderboardService: List<PlayerScore>
+    LeaderboardService->>LeaderboardService: SortScoresAsync()
+    LeaderboardService-->>-LeaderboardUI: Sorted scores
+    
+    LeaderboardUI->>LeaderboardUI: RecreateList()
+    loop For each score
+        LeaderboardUI->>+PlayerLeaderboardRecord: AddRecord()
+        PlayerLeaderboardRecord->>+AuthService: GetPlayerById(playerId)
+        AuthService->>+PlayerRepo: GetByIdAsync(playerId)
+        PlayerRepo->>+TextAdapter: LoadAsync(playerId)
+        TextAdapter-->>-PlayerRepo: Serialized player
+        PlayerRepo-->>-AuthService: Player data
+        AuthService-->>-PlayerLeaderboardRecord: Player details
+        PlayerLeaderboardRecord->>PlayerLeaderboardRecord: SetScore()
+    end
