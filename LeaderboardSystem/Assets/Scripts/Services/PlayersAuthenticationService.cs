@@ -26,7 +26,7 @@ namespace Services
         /// </summary>
         public async Task<Player> RegisterPlayer(string name,string description,Sprite avatar=null)
         {
-            var addedPlayerId = await _playerRepository.AddPlayerAsync(new SavePlayerDto(name,description));
+            var addedPlayerId = await _playerRepository.AddPlayerAsync(name, description);
             if (avatar != null)
                 await _avatarRepository.AddOrUpdateAsync(addedPlayerId, avatar);
 
@@ -39,10 +39,10 @@ namespace Services
         /// </summary>
         public async Task<bool> RemovePlayer(int playerId)
         {
-            if (!await _playerRepository.Exist(playerId)) return false;
+            if (!await _playerRepository.PlayerExist(playerId)) return false;
             if (await _avatarRepository.HasAvatarAsync(playerId))
                 await _avatarRepository.DeleteAsync(playerId);
-            await _playerRepository.DeleteAsync(playerId);
+            await _playerRepository.DeletePlayerAsync(playerId);
             await _playerRepository.SaveChangesAsync();
             return true;
         }
@@ -52,9 +52,8 @@ namespace Services
         /// </summary>
         public async Task<bool> UpdatePlayer(int playerId,string name,string description)
         {
-            var player = new Player(playerId,name,description);
-            if (!await _playerRepository.Exist(player.Id)) return false;
-            await _playerRepository.UpdatePlayerAsync(player);
+            if (!await _playerRepository.PlayerExist(playerId)) return false;
+            await _playerRepository.UpdatePlayerAsync(new Player(playerId, name, description));
             await _playerRepository.SaveChangesAsync();
             return true;
         }
@@ -65,7 +64,7 @@ namespace Services
         {
             if (avatar == null)
             throw new ArgumentNullException(nameof(avatar));
-            if (!await _playerRepository.Exist(playerid)) return false;
+            if (!await _playerRepository.PlayerExist(playerid)) return false;
             if (await _avatarRepository.HasAvatarAsync(playerid))
                 await _avatarRepository.AddOrUpdateAsync(playerid, avatar);
             return true;
@@ -75,7 +74,7 @@ namespace Services
         /// Retrieves a player by their ID
         /// </summary>
         public async Task<Player> GetPlayerById(int playerId) => await _playerRepository.GetByIdAsync(playerId);
-        public async Task<bool> PlayerExist(int playerId) => await _playerRepository.Exist(playerId);
+        public async Task<bool> PlayerExist(int playerId) => await _playerRepository.PlayerExist(playerId);
         public async Task<Sprite> GetPlayerAvatarById(int playerId) => await _avatarRepository.GetByIdAsync(playerId);
     }
 }

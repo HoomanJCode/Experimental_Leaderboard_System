@@ -6,6 +6,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Linq;
 using UnityEngine;
+using System.Collections.Concurrent;
 
 namespace Repositories
 {
@@ -17,59 +18,68 @@ namespace Repositories
         private readonly IStorageAdapter<string> _storage = new TextFileAdapter();
         private string MainPath { get; set; } = Path.Combine(Application.persistentDataPath, "Profiles");
         private int _lastPlayerId;
-        public List<Player> Players { get; private set; } = new List<Player>();
+        private readonly ConcurrentDictionary<int,Player> Players = new();
 
         public PlayerRepository()
         {
             if (!Directory.Exists(MainPath))
                 Directory.CreateDirectory(MainPath);
-            //LoadPlayers().ConfigureAwait(false);
         }
         public PlayerRepository(string mainPath,IStorageAdapter<string> storage)
         {
             _storage = storage;
             MainPath = mainPath;
-            //LoadPlayers().ConfigureAwait(false);
         }
 
-        public async Task<int> AddPlayerAsync(SavePlayerDto playerDto)
+        public async Task<int> AddPlayerAsync(string name,string description)
         {
             int newId = ++_lastPlayerId;
-            var newPlayer = new Player(newId, playerDto.Name, playerDto.Description);
-            Players.Add(newPlayer);
-            //todo: add timing save period
-            //await SaveChangesAsync();
-            return newId;
+            var newPlayer = new Player(newId, name, description);
+            Players.TryAdd(newId, newPlayer);
+            return await Task.FromResult(newId);
         }
 
-        public async Task UpdatePlayerAsync(Player player)
+        public async Task<bool> UpdatePlayerAsync(Player player)
         {
-            var existingPlayer = Players.FirstOrDefault(p => p.Id == player.Id);
-            if (existingPlayer == null)
+            if (!Players.TryGetValue(player.Id, out var currentPlayer))
                 throw new InvalidOperationException($"Player with ID {player.Id} not found.");
-            existingPlayer.Name = player.Name;
-            existingPlayer.Description = player.Description;
-            //await SaveChangesAsync();
+            var newPlayer = new Player(player.Id, player.Name, player.Description);
+            return await Task.FromResult(Players.TryUpdate(player.Id, newPlayer, currentPlayer));
         }
 
         public async Task<Player> GetByIdAsync(int playerId)
         {
-            return await Task.Run(()=> Players.FirstOrDefault(p => p.Id == playerId));
+            if (!Players.TryGetValue(playerId, out var currentPlayer))
+                throw new InvalidOperationException($"Player with ID {playerId} not found.");
+            return await Task.FromResult(currentPlayer);
         }
 
+
+        //todo: design tests for it
+        public async Task<bool> DeletePlayerAsync(int playerId)
+        {
+            if (!Players.ContainsKey(playerId)) throw new InvalidOperationException();
+            return await Task.FromResult(Players.TryRemove(playerId, out _));
+        }
+
+        //todo: design tests for it
+        public Task<bool> PlayerExist(int playerId) => Task.FromResult(Players.ContainsKey(playerId));
         public async Task SaveChangesAsync()
         {
-            await _storage.SaveAsync(Path.Combine(MainPath, StorageKey), Serialize(Players));
+            var playersClone = Players.Values.ToArray().Clone() as Player[];
             await _storage.SaveAsync(Path.Combine(MainPath, LastIdStorageKey), _lastPlayerId.ToString());
+            await _storage.SaveAsync(Path.Combine(MainPath, StorageKey), SerializedPlayersData(playersClone));
         }
 
-        private async Task LoadPlayers()
+        public async Task LoadPlayers()
         {
             var path = Path.Combine(MainPath, StorageKey);
             if (await _storage.Exists(path))
             {
                 var data = await _storage.LoadAsync(path);
-                Players = Deserialize(data) ?? new List<Player>();
+                var loadedPlayers = DeserializePlayersData(data);
+                foreach (var item in loadedPlayers)
+                    Players.TryAdd(item.Id, item);
             }
             var path2 = Path.Combine(MainPath, LastIdStorageKey);
             if (await _storage.Exists(path2))
@@ -78,21 +88,10 @@ namespace Repositories
                 _lastPlayerId= int.TryParse(data, out var id) ? id : 0;
             }
             if (_lastPlayerId == 0 && Players.Count > 0)
-                _lastPlayerId = Players.Max(p => p.Id);
+                _lastPlayerId = Players.Values.Max(p => p.Id);
         }
-        private static string Serialize(List<Player> data) => JsonConvert.SerializeObject(data);
+        private static string SerializedPlayersData(Player[] data) => JsonConvert.SerializeObject(data);
 
-        private static List<Player> Deserialize(string data) => JsonConvert.DeserializeObject<List<Player>>(data);
-
-        //todo: design tests for it
-        public Task DeleteAsync(int playerId)
-        {
-            if (!Players.Exists(p => p.Id == playerId)) throw new InvalidOperationException();
-            Players.RemoveAll(p => p.Id == playerId);
-            return Task.CompletedTask;
-        }
-
-        //todo: design tests for it
-        public Task<bool> Exist(int playerId) => Task.Run(()=>Players.Exists(x=>x.Id==playerId));
+        private static Player[] DeserializePlayersData(string data) => JsonConvert.DeserializeObject<Player[]>(data);
     }
 }

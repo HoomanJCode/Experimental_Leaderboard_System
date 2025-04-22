@@ -16,7 +16,7 @@ public class PlayerRepositoryTests
     public async Task AddPlayerAsync_ShouldReturnPlayerId()
     {
         var _repository = new PlayerRepository("TestPath",new TestStorageAdapter());
-        var result = await _repository.AddPlayerAsync(new SavePlayerDto("New Player", "Desc"));
+        var result = await _repository.AddPlayerAsync("New Player", "Desc");
         Assert.AreEqual(1, result); // First player should get id 1
     }
 
@@ -25,8 +25,8 @@ public class PlayerRepositoryTests
     public async Task AddPlayerAsync_ShouldIncrementIds()
     {
         var _repository = new PlayerRepository("TestPath", new TestStorageAdapter());
-        await _repository.AddPlayerAsync(new SavePlayerDto("New Player1", "Desc"));
-        var result = await _repository.AddPlayerAsync(new SavePlayerDto("New Player2", "Desc"));
+        await _repository.AddPlayerAsync("New Player1", "Desc");
+        var result = await _repository.AddPlayerAsync("New Player2", "Desc");
         Assert.AreEqual(2, result); // Second player should get id 2
     }
 
@@ -44,14 +44,13 @@ public class PlayerRepositoryTests
     public async Task GetByIdAsync_ShouldReturnCorrectPlayer()
     {
         var _repository = new PlayerRepository("TestPath", new TestStorageAdapter());
-        await _repository.AddPlayerAsync(new SavePlayerDto("New Player1", "Desc"));
-        var testSaveData = new SavePlayerDto("New Player2", "Desc");
-        var playerId = await _repository.AddPlayerAsync(testSaveData);
-        await _repository.AddPlayerAsync(new SavePlayerDto("New Player3", "Desc"));
+        await _repository.AddPlayerAsync("New Player1", "Desc");
+        var playerId = await _repository.AddPlayerAsync("New Player2", "Desc");
+        await _repository.AddPlayerAsync("New Player3", "Desc");
         var result = await _repository.GetByIdAsync(playerId);
         Assert.IsNotNull(result);
-        Assert.AreEqual(testSaveData.Name, result.Name);
-        Assert.AreEqual(testSaveData.Description, result.Description);
+        Assert.AreEqual("New Player2", result.Name);
+        Assert.AreEqual("Desc", result.Description);
         Assert.AreEqual(playerId, result.Id);
     }
 
@@ -60,12 +59,11 @@ public class PlayerRepositoryTests
     public async Task UpdatePlayerAsync_ShouldModifyExistingPlayer()
     {
         var _repository = new PlayerRepository("TestPath", new TestStorageAdapter());
-        var testSaveData = new SavePlayerDto("New Player1", "Desc");
-        var playerId = await _repository.AddPlayerAsync(testSaveData);
+        var playerId = await _repository.AddPlayerAsync("New Player1", "Desc");
         var updatedPlayer = new Player(playerId, "Updated Name","Desc2");
 
         // Act
-        await _repository.UpdatePlayerAsync(updatedPlayer);
+        await _repository.UpdatePlayerAsync(new Player(playerId, updatedPlayer.Name, updatedPlayer.Description));
         var result = await _repository.GetByIdAsync(playerId);
 
         // Assert
@@ -79,11 +77,10 @@ public class PlayerRepositoryTests
     {
         var _repository = new PlayerRepository("TestPath", new TestStorageAdapter());
         // Arrange
-        var nonExistentPlayer = new Player (999, "Non Existent", "Desc2");
 
         // Act & Assert
         Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _repository.UpdatePlayerAsync(nonExistentPlayer));
+            _repository.UpdatePlayerAsync(new Player(99, "Non Existent", "Desc2")));
     }
 
     [Test]

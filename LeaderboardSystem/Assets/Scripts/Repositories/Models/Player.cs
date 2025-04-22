@@ -1,7 +1,9 @@
 
+using System;
+
 namespace Repositories.Models
 {
-    public class Player
+    public class Player:ICloneable
     {
         public int Id { get; private set; }
         public string Name { get; set; }
@@ -14,6 +16,11 @@ namespace Repositories.Models
             Id = id;
             Name = name;
             Description = description;
+        }
+
+        public object Clone()
+        {
+            return new Player(Id,Name,Description);
         }
     }
 }
