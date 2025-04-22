@@ -15,10 +15,10 @@ public class LeaderboardService : LeaderboardRepository, ILeaderboardService
 
     public async Task SortScoresAsync()
     {
-        
-        Scores.Sort((a, b) => a.Score.CompareTo(b.Score));
+
+        await Task.Run(() => Scores.Sort((a, b) => b.Score.CompareTo(a.Score)));
         //todo: save changes in period
-        await SaveChangesAsync();
+        //await SaveChangesAsync();
     }
 
     public async Task PushScoreAsync(PlayerScore score)

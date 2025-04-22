@@ -20,7 +20,7 @@ namespace Repositories
             this.LeaderboardKey = LeaderboardKey;
             if (!Directory.Exists(MainPath))
                 Directory.CreateDirectory(MainPath);
-            LoadScores().ConfigureAwait(false);
+            //LoadScores().ConfigureAwait(false);
         }
 
         public async Task SaveChangesAsync()

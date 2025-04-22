@@ -23,13 +23,13 @@ namespace Repositories
         {
             if (!Directory.Exists(MainPath))
                 Directory.CreateDirectory(MainPath);
-            LoadPlayers().ConfigureAwait(false);
+            //LoadPlayers().ConfigureAwait(false);
         }
         public PlayerRepository(string mainPath,IStorageAdapter<string> storage)
         {
             _storage = storage;
             MainPath = mainPath;
-            LoadPlayers().ConfigureAwait(false);
+            //LoadPlayers().ConfigureAwait(false);
         }
 
         public async Task<int> AddPlayerAsync(SavePlayerDto playerDto)
@@ -38,7 +38,7 @@ namespace Repositories
             var newPlayer = new Player(newId, playerDto.Name, playerDto.Description);
             Players.Add(newPlayer);
             //todo: add timing save period
-            await SaveChangesAsync();
+            //await SaveChangesAsync();
             return newId;
         }
 
@@ -49,7 +49,7 @@ namespace Repositories
                 throw new InvalidOperationException($"Player with ID {player.Id} not found.");
             existingPlayer.Name = player.Name;
             existingPlayer.Description = player.Description;
-            await SaveChangesAsync();
+            //await SaveChangesAsync();
         }
 
         public async Task<Player> GetByIdAsync(int playerId)

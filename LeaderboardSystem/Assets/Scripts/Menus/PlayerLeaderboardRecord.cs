@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class PlayerLeaderboardRecord : MonoBehaviour
@@ -14,13 +15,18 @@ public class PlayerLeaderboardRecord : MonoBehaviour
     [SerializeField] private Button DeleteBtn;
     [SerializeField] private Button EditBtn;
     private bool selected;
+    private Sprite defaultAvatar;
     private static readonly List<PlayerLeaderboardRecord> AllRecords =new();
+
+    public UnityAction DeleteAction { get; set; }
+    public UnityAction EditAction { get; set; }
 
     public void SetPlayer(int index,string name,Sprite avatar)
     {
         playerName.text = name;
         this.index.text = index.ToString();
-        this.avatar.sprite = avatar;
+        if(avatar!=null) this.avatar.sprite = avatar;
+        else this.avatar.sprite = defaultAvatar;
     }
     public void SetScore(int score)
     {
@@ -38,6 +44,9 @@ public class PlayerLeaderboardRecord : MonoBehaviour
             SetSelectedMode(true);
         });
         SetSelectedMode(false);
+        defaultAvatar = avatar.sprite;
+        DeleteBtn.onClick.AddListener(DeleteAction);
+        EditBtn.onClick.AddListener(EditAction);
     }
     private void OnDestroy()
     {

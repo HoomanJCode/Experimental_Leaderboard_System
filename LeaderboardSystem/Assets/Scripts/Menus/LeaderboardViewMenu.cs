@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using MenuViews;
 using Repositories.Models;
 using Services;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LeaderboardViewMenu : MenuView
 {
@@ -12,9 +12,22 @@ public class LeaderboardViewMenu : MenuView
     private PlayerLeaderboardRecord leaderboardRecordExample;
     [SerializeField] 
     private LeaderboardJunction leaderboardJunc;
+    [SerializeField]
+    private Button RegisterPlayerBtn;
+    [SerializeField]
+    private Button RefreshLeaderboardBtn;
     private readonly List<PlayerLeaderboardRecord> allRecords=new();
     protected override void Init()
     {
+        RegisterPlayerBtn.onClick.AddListener(() =>
+        {
+            var registerMenuView = GetView<CreatePlayerMenu>();
+            registerMenuView.CreateMode = true;
+            registerMenuView.ChangeToThisView();
+        });
+        RefreshLeaderboardBtn.onClick.AddListener(() => {
+            StartCoroutine(CreateLeaderboard());
+        });
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -30,6 +43,7 @@ public class LeaderboardViewMenu : MenuView
     }
     public IEnumerator CreateLeaderboard()
     {
+        if(leaderboardJunc.Service.Scores.Count==0) 
         for (var i = 0; i < 20; i++)
         {
             var addPlayerTask = PlayersAuthentication.RegisterPlayer($"Player {i}", $"Desc{i}");
@@ -47,18 +61,33 @@ public class LeaderboardViewMenu : MenuView
             yield return new WaitUntil(() => getPlayerTask.IsCompleted);
             var avatar = getAvatarTask.Result==null? null:BytesToSprite(getAvatarTask.Result.ProfileImage);
             yield return new WaitUntil(() => getAvatarTask.IsCompleted);
-            if(allRecords.Count < recordIndex)
-                allRecords[recordIndex].SetPlayer(recordIndex,getPlayerTask.Result.Name, avatar);
+            PlayerLeaderboardRecord record;
+            if (allRecords.Count > recordIndex)
+                record = allRecords[recordIndex];
             else
             {
                 var newRecordGobj = Instantiate(leaderboardRecordExample.gameObject);
-                newRecordGobj.transform.SetParent(leaderboardRecordExample.transform.parent);
-                var newRecord = newRecordGobj.GetComponent<PlayerLeaderboardRecord>();
-                newRecord.SetPlayer(recordIndex, getPlayerTask.Result.Name, avatar);
-                newRecord.SetScore(item.Score);
-                allRecords.Add(newRecord);
+                newRecordGobj.transform.SetParent(leaderboardRecordExample.transform.parent, false);
+                record = newRecordGobj.GetComponent<PlayerLeaderboardRecord>();
+                allRecords.Add(record);
                 newRecordGobj.SetActive(true);
             }
+
+            record.SetPlayer(recordIndex + 1, getPlayerTask.Result.Name, avatar);
+            record.SetScore(item.Score);
+            record.DeleteAction = async () => {
+                await PlayersAuthentication.RemovePlayer(getPlayerTask.Result.Id);
+                StartCoroutine(CreateLeaderboard());
+            };
+            record.EditAction = () => {
+                var editPageView = GetView<CreatePlayerMenu>();
+                editPageView.Name = getPlayerTask.Result.Name;
+                editPageView.Description = getPlayerTask.Result.Description;
+                editPageView.Score = item.Score;
+                editPageView.PlayerId = getPlayerTask.Result.Id;
+                editPageView.CreateMode = false;
+                editPageView.ChangeToThisView();
+            };
             recordIndex++;
         }
     }
