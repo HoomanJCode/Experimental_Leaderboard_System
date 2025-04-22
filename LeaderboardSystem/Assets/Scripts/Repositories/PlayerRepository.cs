@@ -39,7 +39,7 @@ namespace Repositories
             Players.Add(newPlayer);
             //todo: add timing save period
             await SaveChangesAsync();
-            return await Task.FromResult(newId);
+            return newId;
         }
 
         public async Task UpdatePlayerAsync(Player player)
@@ -59,7 +59,7 @@ namespace Repositories
 
         public async Task SaveChangesAsync()
         {
-            await _storage.SaveAsync(Path.Combine(MainPath, StorageKey), Serialize());
+            await _storage.SaveAsync(Path.Combine(MainPath, StorageKey), Serialize(Players));
             await _storage.SaveAsync(Path.Combine(MainPath, LastIdStorageKey), _lastPlayerId.ToString());
         }
 
@@ -80,9 +80,9 @@ namespace Repositories
             if (_lastPlayerId == 0 && Players.Count > 0)
                 _lastPlayerId = Players.Max(p => p.Id);
         }
-        private string Serialize() => JsonConvert.SerializeObject(Players);
+        private static string Serialize(List<Player> data) => JsonConvert.SerializeObject(data);
 
-        private List<Player> Deserialize(string data) => JsonConvert.DeserializeObject<List<Player>>(data);
+        private static List<Player> Deserialize(string data) => JsonConvert.DeserializeObject<List<Player>>(data);
 
         //todo: design tests for it
         public Task DeleteAsync(int playerId)

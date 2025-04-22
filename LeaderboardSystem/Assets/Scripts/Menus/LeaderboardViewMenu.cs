@@ -11,20 +11,16 @@ public class LeaderboardViewMenu : MenuView
     [SerializeField]
     private PlayerLeaderboardRecord leaderboardRecordExample;
     [SerializeField] 
-    private LeaderboardJunction leaderboard;
+    private LeaderboardJunction leaderboardJunc;
     private readonly List<PlayerLeaderboardRecord> allRecords=new();
     protected override void Init()
     {
-        throw new System.NotImplementedException();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
     {
         leaderboardRecordExample.gameObject.SetActive(false);
-        var addPlayerTask=PlayersAuthentication.RegisterPlayer("Player 1","Desc");
-        addPlayerTask.Wait();
-        leaderboard.Service.PushScoreAsync(new PlayerScore(addPlayerTask.Result.Id,Random.Range(1,1000))).Wait();
         StartCoroutine(CreateLeaderboard());
             
     }
@@ -34,36 +30,37 @@ public class LeaderboardViewMenu : MenuView
     }
     public IEnumerator CreateLeaderboard()
     {
-        yield return leaderboard.Service.SortScoresAsync();
+        for (var i = 0; i < 20; i++)
+        {
+            var addPlayerTask = PlayersAuthentication.RegisterPlayer($"Player {i}", $"Desc{i}");
+            yield return new WaitUntil(() => addPlayerTask.IsCompleted);
+            yield return leaderboardJunc.Service.PushScoreAsync(new PlayerScore(addPlayerTask.Result.Id, Random.Range(1, 1000)));
+            yield return leaderboardJunc.Service.SortScoresAsync();
+        }
+
+
         int recordIndex = 0;
-        foreach (var item in leaderboard.Service.Scores)
+        foreach (var item in leaderboardJunc.Service.Scores)
         {
             var getPlayerTask=PlayersAuthentication.GetPlayerById(item.PlayerId);
             var getAvatarTask = PlayersAuthentication.GetPlayerAvatarById(item.PlayerId);
-            yield return new WaitUntil(() => getAvatarTask.IsCompleted);
-            var avatar = BytesToSprite(getAvatarTask.Result.ProfileImage);
             yield return new WaitUntil(() => getPlayerTask.IsCompleted);
+            var avatar = getAvatarTask.Result==null? null:BytesToSprite(getAvatarTask.Result.ProfileImage);
+            yield return new WaitUntil(() => getAvatarTask.IsCompleted);
             if(allRecords.Count < recordIndex)
                 allRecords[recordIndex].SetPlayer(recordIndex,getPlayerTask.Result.Name, avatar);
             else
             {
                 var newRecordGobj = Instantiate(leaderboardRecordExample.gameObject);
+                newRecordGobj.transform.SetParent(leaderboardRecordExample.transform.parent);
                 var newRecord = newRecordGobj.GetComponent<PlayerLeaderboardRecord>();
                 newRecord.SetPlayer(recordIndex, getPlayerTask.Result.Name, avatar);
+                newRecord.SetScore(item.Score);
                 allRecords.Add(newRecord);
+                newRecordGobj.SetActive(true);
             }
             recordIndex++;
         }
-    }
-    private IEnumerator AddRecord(Player player)
-    {
-        var getAvatarTask = PlayersAuthentication.GetPlayerAvatarById(player.Id);
-        yield return new WaitUntil(() => getAvatarTask.IsCompleted);
-        var avatar = BytesToSprite(getAvatarTask.Result.ProfileImage);
-        var newRecordGobj = Instantiate(leaderboardRecordExample.gameObject);
-        var newRecord = newRecordGobj.GetComponent<PlayerLeaderboardRecord>();
-        newRecord.SetPlayer(0, player.Name, avatar);
-        allRecords.Add(newRecord);
     }
     private static Sprite BytesToSprite(byte[] bytes)
     {

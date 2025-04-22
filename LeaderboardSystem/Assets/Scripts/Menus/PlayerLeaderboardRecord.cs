@@ -34,13 +34,10 @@ public class PlayerLeaderboardRecord : MonoBehaviour
             //deselect other buttons in this leaderboard
             var otherSelected = AllRecords.FindAll(x => x.selected && x.transform.parent == transform.parent);
             foreach (var item in otherSelected)
-            {
-                item.selected = false;
                 item.SetSelectedMode(false);
-            }
-            selected = true;
             SetSelectedMode(true);
         });
+        SetSelectedMode(false);
     }
     private void OnDestroy()
     {
@@ -48,8 +45,9 @@ public class PlayerLeaderboardRecord : MonoBehaviour
     }
     private void SetSelectedMode(bool status)
     {
-        DeleteBtn.enabled = status;
-        EditBtn.enabled = status;
-        score.enabled = !status;
+        selected = status;
+        DeleteBtn.gameObject.SetActive(status);
+        EditBtn.gameObject.SetActive(status);
+        score.gameObject.SetActive(!status);
     }
 }

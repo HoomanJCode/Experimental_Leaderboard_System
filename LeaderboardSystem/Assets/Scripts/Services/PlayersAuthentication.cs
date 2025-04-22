@@ -14,26 +14,26 @@ namespace Services
         /// Adds a new player to the system
         /// </summary>
         public static async Task<Player> RegisterPlayer(string name, string description, Texture2D avatar=null)=>
-        await _instance.RegisterPlayer(name, description, avatar);
+        await Instance.RegisterPlayer(name, description, avatar);
 
         /// <summary>
         /// Removes a player from the system
         /// </summary>
-        public static async Task<bool> RemovePlayer(int playerId)=> await _instance.RemovePlayer(playerId);
+        public static async Task<bool> RemovePlayer(int playerId)=> await Instance.RemovePlayer(playerId);
         /// <summary>
         /// Updates an existing player
         /// </summary>
-        public static async Task<bool> UpdatePlayer(Player player) => await _instance.UpdatePlayer(player);
+        public static async Task<bool> UpdatePlayer(Player player) => await Instance.UpdatePlayer(player);
         /// <summary>
         /// Updates an existing player Avatar
         /// </summary>
-        public static async Task<bool> UpdatePlayerAvatar(PlayerAvatar avatar) => await _instance.UpdatePlayerAvatar(avatar);
+        public static async Task<bool> UpdatePlayerAvatar(PlayerAvatar avatar) => await Instance.UpdatePlayerAvatar(avatar);
         /// <summary>
         /// Retrieves a player by their ID
         /// </summary>
-        public static async Task<Player> GetPlayerById(int playerId) => await _instance.GetPlayerById(playerId);
-        public static async Task<bool> PlayerExist(int playerId) => await _instance.PlayerExist(playerId);
-        public static async Task<PlayerAvatar> GetPlayerAvatarById(int playerId) => await _instance.GetPlayerAvatarById(playerId);
+        public static async Task<Player> GetPlayerById(int playerId) => await Instance.GetPlayerById(playerId);
+        public static async Task<bool> PlayerExist(int playerId) => await Instance.PlayerExist(playerId);
+        public static async Task<PlayerAvatar> GetPlayerAvatarById(int playerId) => await Instance.GetPlayerAvatarById(playerId);
 
 
     }
