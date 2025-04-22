@@ -10,10 +10,12 @@ namespace Repositories
     {
         private readonly IStorageAdapter<byte[]> _storage = new PhotoFileAdapter();
 
-        private string MainPath { get; set; } = "C:\\...";
+        private string MainPath { get; set; } = Path.Combine(Application.persistentDataPath,"Profiles","Avatars");
 
         public AvatarRepository()
         {
+            if(!Directory.Exists(MainPath))
+                Directory.CreateDirectory(MainPath);
         }
 
         public AvatarRepository(string mainPath, IStorageAdapter<byte[]> storage)

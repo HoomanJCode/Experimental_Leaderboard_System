@@ -5,6 +5,7 @@ using Repositories.Models;
 using System.Linq;
 using Services;
 using System;
+using System.Diagnostics;
 
 public class LeaderboardService : LeaderboardRepository, ILeaderboardService
 {
@@ -14,8 +15,10 @@ public class LeaderboardService : LeaderboardRepository, ILeaderboardService
 
     public async Task SortScoresAsync()
     {
-        Scores.Sort((a, b) => b.Score.CompareTo(a.Score));
-        await SaveChangesAsync();
+
+        await Task.Run(() => Scores.Sort((a, b) => b.Score.CompareTo(a.Score)));
+        //todo: save changes in period
+        //await SaveChangesAsync();
     }
 
     public async Task PushScoreAsync(PlayerScore score)

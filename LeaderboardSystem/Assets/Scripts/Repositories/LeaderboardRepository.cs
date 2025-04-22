@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Repositories.Models;
 using System.IO;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Repositories
 {
@@ -10,14 +11,16 @@ namespace Repositories
     {
         private readonly IStorageAdapter<string> _storage = new TextFileAdapter();
         private readonly string LeaderboardKey;
-        private string MainPath => "C:\\...";
+        private string MainPath => Path.Combine(Application.persistentDataPath, "Leaderboards");
 
         public List<PlayerScore> Scores { get; private set; } = new List<PlayerScore>();
 
         public LeaderboardRepository(string LeaderboardKey)
         {
             this.LeaderboardKey = LeaderboardKey;
-            LoadScores().ConfigureAwait(false);
+            if (!Directory.Exists(MainPath))
+                Directory.CreateDirectory(MainPath);
+            //LoadScores().ConfigureAwait(false);
         }
 
         public async Task SaveChangesAsync()
