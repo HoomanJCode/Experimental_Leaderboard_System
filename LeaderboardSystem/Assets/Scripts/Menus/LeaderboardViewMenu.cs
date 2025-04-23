@@ -61,8 +61,8 @@ public class LeaderboardViewMenu : MenuView
         int recordIndex = 0;
         foreach (var item in scores)
         {
-            var getPlayerTask=PlayersAuthentication.GetPlayerById(item.PlayerId);
-            var getAvatarTask = PlayersAuthentication.GetPlayerAvatarById(item.PlayerId);
+            var getPlayerTask= PlayersAuthenticationService.Instance.GetPlayerById(item.PlayerId);
+            var getAvatarTask = PlayersAuthenticationService.Instance.GetPlayerAvatarById(item.PlayerId);
             yield return new WaitUntil(() => getPlayerTask.IsCompleted);
             var avatar = getAvatarTask.Result==null? null: getAvatarTask.Result;
             yield return new WaitUntil(() => getAvatarTask.IsCompleted);

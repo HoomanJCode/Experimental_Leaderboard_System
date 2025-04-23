@@ -43,7 +43,7 @@ public class LeaderboardService : LeaderboardRepository, ILeaderboardService, IS
 
     public async Task PushScoreAsync(int playerId,int score)
     {
-        if (!await PlayersAuthentication.PlayerExist(playerId))
+        if (!await PlayersAuthenticationService.Instance.PlayerExist(playerId))
             throw new InvalidOperationException("Player Not Exist!");
         Scores.AddOrUpdate(playerId,score,(a,b)=>score);
         SaveChanges();

@@ -54,19 +54,19 @@ public class PlayerProfileMenu : MenuView
         DeletePlayerBtn.onClick.AddListener(async () =>
         {
             await leaderboardJunc.Service.DeleteScoreAsync(PlayerId);
-            await PlayersAuthentication.RemovePlayer(PlayerId);
+            await PlayersAuthenticationService.Instance.RemovePlayer(PlayerId);
             GetView<LeaderboardViewMenu>().ChangeToThisView();
         });
         RegisterBtn.onClick.AddListener(async () =>
         {
-            var player =await PlayersAuthentication.RegisterPlayer(Name, Description);
+            var player =await PlayersAuthenticationService.Instance.RegisterPlayer(Name, Description);
             //todo: submit avatar
             await leaderboardJunc.Service.PushScoreAsync(player.Id, Score);
             GetView<LeaderboardViewMenu>().ChangeToThisView();
         });
         UpdateBtn.onClick.AddListener(async () =>
         {
-            var player =await PlayersAuthentication.UpdatePlayer(PlayerId,Name, Description);
+            var player =await PlayersAuthenticationService.Instance.UpdatePlayer(PlayerId,Name, Description);
             //todo: update avatar
             await leaderboardJunc.Service.PushScoreAsync(PlayerId, Score);
             GetView<LeaderboardViewMenu>().ChangeToThisView();
