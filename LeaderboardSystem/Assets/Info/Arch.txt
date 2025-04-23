@@ -1,70 +1,94 @@
 Storage/
-     - IStorageAdapter.cs
-        - Exists
-        - SaveAsync
-        - LoadAsync
-        - Delete
-     - PhotoFileAdapter.cs : IStorageAdapter<byte[]>
-     - TextFileAdapter.cs : IStorageAdapter<string>
+- IStorageAdapter.cs
+###### Class: FileSystemAdapter
+####### Method: ReadFromFileAsync
+####### Method: WriteToFileAsync
+####### Method: Exists
+####### Method: SaveAsync
+####### Method: LoadAsync
+####### Method: Delete
+####### Class: PhotoFileAdapter
+######## Method: ReadFromFileAsync
+######## Method: WriteToFileAsync
+####### Class: TextFileAdapter
+######## Method: ReadFromFileAsync
+######## Method: WriteToFileAsync
 
-Repositories/Models/
-   - Player.cs
-     - int Id
-     - string Name
-     - string Description
-   - PlayerAvatar.cs
-     - int PlayerId
-     - byte[] ProfileImage
-   - PlayerScore.cs
-     - int PlayerId
-     - int Score
 
 Repositories/
-     - IPlayerRepository.cs
-        - AddAsync
-        - UpdateAsync
-        - GetByIdAsync
-        - DeleteAsync
-        - SaveChangesAsync
-     - IAvatarRepository.cs
-        - AddAsync
-        - UpdateAsync
-        - GetByIdAsync
-        - DeleteAsync
-     - ILeaderboardRepository.cs
-        - SaveChangesAsync
-        - DeleteAsync
-     - PlayerRepository.cs : IPlayerRepository
-     - AvatarRepository.cs : IAvatarRepository
-     - LeaderboardRepository.cs : ILeaderboardRepository
-        - List<PlayerScore> Scores
+- IPlayerRepository.cs
+- IAvatarRepository.cs
+- ILeaderboardRepository.cs
+####### Class: PlayerRepository
+######## Method: AddPlayerAsync
+######## Method: UpdatePlayerAsync
+######## Method: GetByIdAsync
+######## Method: DeletePlayerAsync
+######## Method: PlayerExist
+######## Method: SaveChangesAsync
+######## Method: LoadPlayersAsync
+######## Method: SerializedPlayersData
+######## Method: DeserializePlayersData
+####### Class: AvatarRepository
+######## Method: AddOrUpdateAsync
+######## Method: GetByIdAsync
+######## Method: DeleteAsync
+######## Method: HasAvatarAsync
+####### Class: LeaderboardRepository
+######## Method: SaveChangesAsync
+######## Method: LoadScoresAsync
+######## Method: DeleteFileAsync
+######## Method: Serialize
+######## Method: Deserialize
+####### Class: SpriteUtilities
+######## Method: BytesToSprite
+######## Method: SpriteToByte
+####### Class: Player
+######## Method: Clone
 
 Services/
-   - PlayersAuthenticationService.cs (Is not Monobehaviour)
-      - Static Instance
-      - Static LoadSingletone
-      - AddPlayer
-      - RemovePlayer
-      - UpdatePlayer
-      - GetPlayerById
-   - ILeaderboardService.cs
-      - SortScoresAsync
-      - PushScoreAsync
-      - GetHighestScoresAsync
-   - abstract LeaderboardService.cs : Monobehaviour,ILeaderboardService
-   - MainLeaderboard.cs : LeaderboardService
+- ILeaderboardService.cs
+####### Class: PlayersAuthenticationService
+######## Method: SaveChanges
+######## Method: MemChangesEnumerator
+######## Method: RegisterPlayer
+######## Method: RemovePlayer
+######## Method: UpdatePlayer
+######## Method: UpdatePlayerAvatar
+######## Method: GetPlayerById
+######## Method: PlayerExist
+######## Method: GetPlayerAvatarById
+######## Method: WaitCheckForSetup
+####### Class: LeaderboardService
+######## Method: SaveChanges
+######## Method: MemChangesEnumerator
+######## Method: GetSortedScores
+######## Method: PushScoreAsync
+######## Method: DeleteScoreAsync
+######## Method: GetHighestScoresAsync
+######## Method: WaitCheckForSetup
+####### Class: LeaderboardJunction
+######## Method: Setup
+####### Class: MainLeaderboardJunction
+######## Method: Awake
+####### Class: CoroutineRunner
+####### Class: TaskExtensions
+######## Method: UntileComplete
+####### Class: PlayerScore
    
 UI/
-    - LeaderboardViewMenu.cs : MenuView
-        - LeaderboardService Leaderboard
-        - private AddRecord
-        - ClearList
-        - RecreateList
-    - PlayerLeaderboardRecord.cs : Monobehaviour
-        - LoadDataById
-        - SetScore
-        - DeletePlayer
-        - Selected
-        - SelectedSetScore
-    - CreatePlayerMenu.cs : MenuView
-        - Create
+###### Class: LeaderboardViewMenu
+####### Method: Init
+####### Method: ChangeToThisView
+####### Method: Start
+####### Method: WaitAndRefreshLeaderboardOnLoad
+####### Method: StartRefreshLeaderboard
+####### Method: RefreshLeaderboard
+###### Class: PlayerLeaderboardRecord
+####### Method: SetPlayer
+####### Method: SetScore
+####### Method: Awake
+####### Method: OnDestroy
+####### Method: SetSelectedMode###### 
+###### Class: PlayerProfileMenu
+####### Method: Init
