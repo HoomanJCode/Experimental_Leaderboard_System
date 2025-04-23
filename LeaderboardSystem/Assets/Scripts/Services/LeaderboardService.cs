@@ -5,7 +5,6 @@ using Repositories.Models;
 using System.Linq;
 using Services;
 using System;
-using System.Diagnostics;
 
 public class LeaderboardService : LeaderboardRepository, ILeaderboardService
 {
@@ -13,30 +12,28 @@ public class LeaderboardService : LeaderboardRepository, ILeaderboardService
     {
     }
 
-    public async Task SortScoresAsync()
+    public Task<List<PlayerScore>> GetSortedScores()
     {
-
-        await Task.Run(() => Scores.Sort((a, b) => b.Score.CompareTo(a.Score)));
-        //todo: save changes in period
-        //await SaveChangesAsync();
+        var list=Scores.Select(x => new PlayerScore(x.Key,x.Value)).ToList();
+        list.Sort((a, b) => b.Score.CompareTo(a.Score));
+        return Task.FromResult(list);
     }
 
-    public async Task PushScoreAsync(PlayerScore score)
+    public async Task PushScoreAsync(int playerId,int score)
     {
-        if (!await PlayersAuthentication.PlayerExist(score.PlayerId))
+        if (!await PlayersAuthentication.PlayerExist(playerId))
             throw new InvalidOperationException("Player Not Exist!");
-        var lastScore = Scores.Find(x=>x.PlayerId==score.PlayerId);
-        if (lastScore == null) Scores.Add(score);
-        else lastScore.Score = score.Score;
-        await SortScoresAsync();
+        Scores.AddOrUpdate(playerId,score,(a,b)=>score);
     }
     public async Task DeleteScoreAsync(int playerId)
     {
-        await Task.Run(()=> Scores.RemoveAll(x => x.PlayerId == playerId));
+        Scores.TryRemove(playerId, out _);
+        await Task.CompletedTask;
     }
     public async Task<List<PlayerScore>> GetHighestScoresAsync(int count)
     {
-        await SortScoresAsync();
-        return Scores.Take(count).ToList();
+        var sortedList=await GetSortedScores();
+        return sortedList.Take(count).ToList();
     }
+
 }

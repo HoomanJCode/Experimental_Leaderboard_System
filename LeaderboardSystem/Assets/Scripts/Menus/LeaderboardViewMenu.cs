@@ -54,10 +54,12 @@ public class LeaderboardViewMenu : MenuView
     }
     private IEnumerator RefreshLeaderboard()
     {
-        yield return leaderboardJunc.Service.SortScoresAsync();
-        var trashRecordsCount = allRecords.Count-leaderboardJunc.Service.Scores.Count;
+        var getScoresTask= leaderboardJunc.Service.GetSortedScores(); 
+        yield return new WaitUntil(()=> getScoresTask.IsCompleted);
+        var scores = getScoresTask.Result;
+        var trashRecordsCount = allRecords.Count- scores.Count;
         int recordIndex = 0;
-        foreach (var item in leaderboardJunc.Service.Scores)
+        foreach (var item in scores)
         {
             var getPlayerTask=PlayersAuthentication.GetPlayerById(item.PlayerId);
             var getAvatarTask = PlayersAuthentication.GetPlayerAvatarById(item.PlayerId);

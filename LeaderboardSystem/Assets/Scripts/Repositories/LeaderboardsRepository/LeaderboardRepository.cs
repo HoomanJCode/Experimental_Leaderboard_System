@@ -4,6 +4,8 @@ using Repositories.Models;
 using System.IO;
 using Newtonsoft.Json;
 using UnityEngine;
+using System.Collections.Concurrent;
+using System.Linq;
 
 namespace Repositories
 {
@@ -13,39 +15,47 @@ namespace Repositories
         private readonly string LeaderboardKey;
         private string MainPath => Path.Combine(Application.persistentDataPath, "Leaderboards");
 
-        public List<PlayerScore> Scores { get; private set; } = new List<PlayerScore>();
+        protected ConcurrentDictionary<int,int> Scores { get; private set; } = new();
 
         public LeaderboardRepository(string LeaderboardKey)
         {
             this.LeaderboardKey = LeaderboardKey;
             if (!Directory.Exists(MainPath))
                 Directory.CreateDirectory(MainPath);
-            //LoadScores().ConfigureAwait(false);
         }
 
+        private struct PlayerScore
+        {
+            public PlayerScore(int id, int score) { Id = id;Score = score; }
+            public int Id;
+            public int Score;
+        }
         public async Task SaveChangesAsync()
         {
-            await _storage.SaveAsync(Path.Combine(MainPath, LeaderboardKey), Serialize());
+            var scoresData=Scores.Select(x => new PlayerScore(x.Key,x.Value)).ToArray();
+            await _storage.SaveAsync(Path.Combine(MainPath, LeaderboardKey), Serialize(scoresData));
         }
 
-        public async Task DeleteAsync()
-        {
-            var path = Path.Combine(MainPath, LeaderboardKey);
-            if (await _storage.Exists(path)) await _storage.Delete(path);
-        }
-
-        private async Task LoadScores()
+        public async Task LoadScores()
         {
             var path=Path.Combine(MainPath, LeaderboardKey);
             if (await _storage.Exists(path))
             {
                 var data = await _storage.LoadAsync(path);
-                Scores = Deserialize(data) ?? new List<PlayerScore>();
+                var scores = Deserialize(data);
+                foreach (var item in scores)
+                    Scores.TryAdd(item.Id,item.Score);
             }
         }
 
-        private string Serialize() => JsonConvert.SerializeObject(Scores);
+        public async Task DeleteFileAsync()
+        {
+            var path = Path.Combine(MainPath, LeaderboardKey);
+            if (await _storage.Exists(path)) await _storage.Delete(path);
+        }
 
-        private List<PlayerScore> Deserialize(string data) => JsonConvert.DeserializeObject<List<PlayerScore>>(data);
+        private static string Serialize(PlayerScore[] scores) => JsonConvert.SerializeObject(scores);
+
+        private static PlayerScore[] Deserialize(string data) => JsonConvert.DeserializeObject<PlayerScore[]>(data);
     }
 }

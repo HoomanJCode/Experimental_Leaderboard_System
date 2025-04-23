@@ -37,7 +37,7 @@ public class PlayerProfileMenu : MenuView
             }
             DeletePlayerBtn.gameObject.SetActive(!value);
             UpdateBtn.gameObject.SetActive(!value);
-            RegisterBtn.gameObject.SetActive(!value);
+            RegisterBtn.gameObject.SetActive(value);
             _createMode = value;
         }
     }
@@ -61,14 +61,14 @@ public class PlayerProfileMenu : MenuView
         {
             var player =await PlayersAuthentication.RegisterPlayer(Name, Description);
             //todo: submit avatar
-            await leaderboardJunc.Service.PushScoreAsync(new PlayerScore(player.Id, Score));
+            await leaderboardJunc.Service.PushScoreAsync(player.Id, Score);
             GetView<LeaderboardViewMenu>().ChangeToThisView();
         });
         UpdateBtn.onClick.AddListener(async () =>
         {
             var player =await PlayersAuthentication.UpdatePlayer(PlayerId,Name, Description);
             //todo: update avatar
-            await leaderboardJunc.Service.PushScoreAsync(new PlayerScore(PlayerId, Score));
+            await leaderboardJunc.Service.PushScoreAsync(PlayerId, Score);
             GetView<LeaderboardViewMenu>().ChangeToThisView();
         });
         CreateMode = true;
