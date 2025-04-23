@@ -10,7 +10,7 @@ namespace Repositories
         Task<Player> GetByIdAsync(int playerId);
         Task<bool> PlayerExist(int playerId);
         Task SaveChangesAsync();
-        Task LoadPlayers();
+        Task LoadPlayersAsync();
         Task<bool> DeletePlayerAsync(int playerId);
     }
 }

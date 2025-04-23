@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading.Tasks;
 using Repositories;
 using Repositories.Models;
@@ -6,18 +7,39 @@ using UnityEngine;
 
 namespace Services
 {
-    public class PlayersAuthenticationService
+    public class PlayersAuthenticationService: IServiceSetup
     {
+        private static PlayersAuthenticationService _instance;
+        public static PlayersAuthenticationService Instance => _instance ??= new PlayersAuthenticationService();
         // Dependencies
         private readonly IPlayerRepository _playerRepository;
         private readonly IAvatarRepository _avatarRepository;
+        private bool playersLoaded = false;
+        private float saveTimer=-1;
+        private void SaveChanges()
+        {
+            saveTimer = 4;
+        }
 
+        private IEnumerator MemChangesEnumerator()
+        {
+            yield return _playerRepository.LoadPlayersAsync().UntileComplete();
+            playersLoaded = true;
+            while (true)
+            {
+                yield return new WaitForSeconds(1);
+                if (saveTimer < 0) continue;
+                if (saveTimer == 0) yield return _playerRepository.SaveChangesAsync().UntileComplete();
+                saveTimer--;
+            }
+        }
         // Private constructor for singleton
         public PlayersAuthenticationService()
         {
             // Initialize repositories (could be injected via DI in a real scenario)
             _playerRepository = new PlayerRepository();
             _avatarRepository = new AvatarRepository();
+            CoroutineRunner.Singletone.StartCoroutine(MemChangesEnumerator());
         }
 
 
@@ -27,10 +49,9 @@ namespace Services
         public async Task<Player> RegisterPlayer(string name,string description,Sprite avatar=null)
         {
             var addedPlayerId = await _playerRepository.AddPlayerAsync(name, description);
+            SaveChanges();
             if (avatar != null)
                 await _avatarRepository.AddOrUpdateAsync(addedPlayerId, avatar);
-
-            //await _playerRepository.SaveChangesAsync();
             return new Player(addedPlayerId, name, description);
         }
 
@@ -43,18 +64,19 @@ namespace Services
             if (await _avatarRepository.HasAvatarAsync(playerId))
                 await _avatarRepository.DeleteAsync(playerId);
             await _playerRepository.DeletePlayerAsync(playerId);
-            await _playerRepository.SaveChangesAsync();
+            SaveChanges();
             return true;
         }
 
         /// <summary>
         /// Updates an existing player
         /// </summary>
-        public async Task<bool> UpdatePlayer(int playerId,string name,string description)
+        public async Task<bool> UpdatePlayer(int playerId,string name,string description, Sprite avatar = null)
         {
             if (!await _playerRepository.PlayerExist(playerId)) return false;
             await _playerRepository.UpdatePlayerAsync(new Player(playerId, name, description));
-            await _playerRepository.SaveChangesAsync();
+            SaveChanges();
+            if(avatar!=null) await UpdatePlayerAvatar(playerId, avatar);
             return true;
         }
         /// <summary>
@@ -76,5 +98,11 @@ namespace Services
         public async Task<Player> GetPlayerById(int playerId) => await _playerRepository.GetByIdAsync(playerId);
         public async Task<bool> PlayerExist(int playerId) => await _playerRepository.PlayerExist(playerId);
         public async Task<Sprite> GetPlayerAvatarById(int playerId) => await _avatarRepository.GetByIdAsync(playerId);
+
+        public async Task WaitCheckForSetup()
+        {
+            while (!playersLoaded) 
+                await Task.Delay(100);
+        }
     }
 }

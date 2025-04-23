@@ -71,7 +71,7 @@ namespace Repositories
             await _storage.SaveAsync(Path.Combine(MainPath, StorageKey), SerializedPlayersData(playersClone));
         }
 
-        public async Task LoadPlayers()
+        public async Task LoadPlayersAsync()
         {
             var path = Path.Combine(MainPath, StorageKey);
             if (await _storage.Exists(path))
@@ -79,7 +79,7 @@ namespace Repositories
                 var data = await _storage.LoadAsync(path);
                 var loadedPlayers = DeserializePlayersData(data);
                 foreach (var item in loadedPlayers)
-                    Players.TryAdd(item.Id, item);
+                    if (!Players.TryAdd(item.Id, item)) throw new InvalidDataException($"Error On Adding {item}");
             }
             var path2 = Path.Combine(MainPath, LastIdStorageKey);
             if (await _storage.Exists(path2))

@@ -7,8 +7,7 @@ namespace Services
     public static class PlayersAuthentication
     {
         // Singleton instance
-        private static PlayersAuthenticationService _instance;
-        public static PlayersAuthenticationService Instance => _instance ??= new PlayersAuthenticationService();
+        public static PlayersAuthenticationService Instance => PlayersAuthenticationService.Instance;
 
         /// <summary>
         /// Adds a new player to the system

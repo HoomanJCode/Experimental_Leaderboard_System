@@ -36,7 +36,7 @@ namespace Repositories
             await _storage.SaveAsync(Path.Combine(MainPath, LeaderboardKey), Serialize(scoresData));
         }
 
-        public async Task LoadScores()
+        public async Task LoadScoresAsync()
         {
             var path=Path.Combine(MainPath, LeaderboardKey);
             if (await _storage.Exists(path))
