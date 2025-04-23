@@ -1,6 +1,6 @@
-using NUnit.Framework;
 using System.Collections;
 using System.IO;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -21,7 +21,7 @@ public class PhotoFileAdapterTests
     public IEnumerator SaveAsync_CreatesFile()
     {
         var adapter = new PhotoFileAdapter();
-        var testFilePath = Path.Combine(Application.persistentDataPath, nameof(PhotoFileAdapterTests) + "." + nameof(SaveAsync_CreatesFile)+ ".dat");
+        var testFilePath = Path.Combine(Application.persistentDataPath, nameof(PhotoFileAdapterTests) + "." + nameof(SaveAsync_CreatesFile) + ".dat");
         var testImageData = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
         yield return adapter.SaveAsync(testFilePath, testImageData);
         Assert.IsTrue(File.Exists(testFilePath));
@@ -33,7 +33,7 @@ public class PhotoFileAdapterTests
     public IEnumerator LoadAsync_ReturnsSavedData()
     {
         var adapter = new PhotoFileAdapter();
-        var testFilePath = Path.Combine(Application.persistentDataPath, nameof(PhotoFileAdapterTests) + "." + nameof(LoadAsync_ReturnsSavedData)+ ".dat");
+        var testFilePath = Path.Combine(Application.persistentDataPath, nameof(PhotoFileAdapterTests) + "." + nameof(LoadAsync_ReturnsSavedData) + ".dat");
         var testImageData = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
         yield return adapter.SaveAsync(testFilePath, testImageData);
         var loadTask = adapter.LoadAsync(testFilePath);
@@ -49,7 +49,7 @@ public class PhotoFileAdapterTests
     public IEnumerator Delete_RemovesFile()
     {
         var adapter = new PhotoFileAdapter();
-        var testFilePath = Path.Combine(Application.persistentDataPath, nameof(PhotoFileAdapterTests) + "." + nameof(Delete_RemovesFile)+ ".dat");
+        var testFilePath = Path.Combine(Application.persistentDataPath, nameof(PhotoFileAdapterTests) + "." + nameof(Delete_RemovesFile) + ".dat");
         var testImageData = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
         File.WriteAllBytes(testFilePath, testImageData);
         yield return adapter.Delete(testFilePath);

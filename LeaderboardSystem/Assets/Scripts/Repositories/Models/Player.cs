@@ -3,7 +3,7 @@ using System;
 
 namespace Repositories.Models
 {
-    public class Player:ICloneable
+    public class Player : ICloneable
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -20,7 +20,7 @@ namespace Repositories.Models
 
         public object Clone()
         {
-            return new Player(Id,Name,Description);
+            return new Player(Id, Name, Description);
         }
     }
 }

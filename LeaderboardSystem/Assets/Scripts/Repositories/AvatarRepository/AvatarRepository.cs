@@ -10,10 +10,10 @@ namespace Repositories
     public class AvatarRepository : IAvatarRepository
     {
         private readonly IStorageAdapter<byte[]> _storage = new PhotoFileAdapter();
-        private readonly ConcurrentDictionary<int, Sprite> avatarsCache=new();
-        private readonly List<int> avatarNotExist=new();
+        private readonly ConcurrentDictionary<int, Sprite> avatarsCache = new();
+        private readonly List<int> avatarNotExist = new();
 
-        private string MainPath { get; set; } = Path.Combine(Application.persistentDataPath,"Profiles","Avatars");
+        private string MainPath { get; set; } = Path.Combine(Application.persistentDataPath, "Profiles", "Avatars");
 
         public AvatarRepository()
         {
@@ -27,12 +27,12 @@ namespace Repositories
             Directory.CreateDirectory(MainPath);
         }
 
-        public async Task AddOrUpdateAsync(int playerId,Sprite avatar)
+        public async Task AddOrUpdateAsync(int playerId, Sprite avatar)
         {
             var path = Path.Combine(MainPath, playerId.ToString());
-            avatarsCache.AddOrUpdate(playerId,avatar,(a,b)=> avatar);
+            avatarsCache.AddOrUpdate(playerId, avatar, (a, b) => avatar);
             await _storage.SaveAsync(path, SpriteUtilities.SpriteToByte(avatar));
-            if(avatarNotExist.Contains(playerId))
+            if (avatarNotExist.Contains(playerId))
                 avatarNotExist.Remove(playerId);
         }
 
@@ -44,14 +44,14 @@ namespace Repositories
             if (cached) return sprite;
             var imageData = await _storage.LoadAsync(path);
             sprite = SpriteUtilities.BytesToSprite(imageData);
-            avatarsCache.TryAdd(playerId,sprite);
+            avatarsCache.TryAdd(playerId, sprite);
             return sprite;
         }
 
         public async Task DeleteAsync(int playerId)
         {
             var path = Path.Combine(MainPath, playerId.ToString());
-            avatarsCache.TryRemove(playerId,out _);
+            avatarsCache.TryRemove(playerId, out _);
             if (!await _storage.Exists(path)) throw new InvalidOperationException("Player Not Exist!");
             await _storage.Delete(path);
             avatarNotExist.Add(playerId);
@@ -63,7 +63,7 @@ namespace Repositories
             if (avatarsCache.ContainsKey(playerId)) return true;
             if (avatarNotExist.Contains(playerId)) return false;
             var path = Path.Combine(MainPath, playerId.ToString());
-            var existFile=await _storage.Exists(path);
+            var existFile = await _storage.Exists(path);
             if (!existFile) avatarNotExist.Add(playerId);
             return existFile;
         }

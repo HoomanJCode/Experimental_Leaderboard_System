@@ -1,6 +1,6 @@
-using NUnit.Framework;
 using System.Collections;
 using System.IO;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -23,7 +23,7 @@ public class TextFileAdapterTests
     {
         var adapter = new TextFileAdapter();
         var testFilePath = Path.Combine(Application.persistentDataPath, nameof(TextFileAdapterTests) + "." + nameof(SaveAsync_CreatesFile) + ".dat");
-        var testTextData = "This is a test string with some content."; 
+        var testTextData = "This is a test string with some content.";
 
         yield return adapter.SaveAsync(testFilePath, testTextData);
         Assert.IsTrue(File.Exists(testFilePath));

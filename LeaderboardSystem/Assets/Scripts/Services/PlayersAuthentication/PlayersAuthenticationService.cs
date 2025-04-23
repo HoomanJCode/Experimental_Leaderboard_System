@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Services
 {
-    public class PlayersAuthenticationService: IServiceSetup
+    public class PlayersAuthenticationService : IServiceSetup
     {
         private static PlayersAuthenticationService _instance;
         public static PlayersAuthenticationService Instance => _instance ??= new PlayersAuthenticationService();
@@ -15,7 +15,7 @@ namespace Services
         private readonly IPlayerRepository _playerRepository;
         private readonly IAvatarRepository _avatarRepository;
         private bool playersLoaded = false;
-        private float saveTimer=-1;
+        private float saveTimer = -1;
         private void SaveChanges()
         {
             saveTimer = 4;
@@ -46,7 +46,7 @@ namespace Services
         /// <summary>
         /// Adds a new player to the system
         /// </summary>
-        public async Task<Player> RegisterPlayer(string name,string description,Sprite avatar=null)
+        public async Task<Player> RegisterPlayer(string name, string description, Sprite avatar = null)
         {
             var addedPlayerId = await _playerRepository.AddPlayerAsync(name, description);
             SaveChanges();
@@ -71,21 +71,21 @@ namespace Services
         /// <summary>
         /// Updates an existing player
         /// </summary>
-        public async Task<bool> UpdatePlayer(int playerId,string name,string description, Sprite avatar = null)
+        public async Task<bool> UpdatePlayer(int playerId, string name, string description, Sprite avatar = null)
         {
             if (!await _playerRepository.PlayerExist(playerId)) return false;
             await _playerRepository.UpdatePlayerAsync(new Player(playerId, name, description));
             SaveChanges();
-            if(avatar!=null) await UpdatePlayerAvatar(playerId, avatar);
+            if (avatar != null) await UpdatePlayerAvatar(playerId, avatar);
             return true;
         }
         /// <summary>
         /// Updates an existing player Avatar
         /// </summary>
-        public async Task<bool> UpdatePlayerAvatar(int playerid,Sprite avatar)
+        public async Task<bool> UpdatePlayerAvatar(int playerid, Sprite avatar)
         {
             if (avatar == null)
-            throw new ArgumentNullException(nameof(avatar));
+                throw new ArgumentNullException(nameof(avatar));
             if (!await _playerRepository.PlayerExist(playerid)) return false;
             if (await _avatarRepository.HasAvatarAsync(playerid))
                 await _avatarRepository.AddOrUpdateAsync(playerid, avatar);
@@ -101,7 +101,7 @@ namespace Services
 
         public async Task WaitCheckForSetup()
         {
-            while (!playersLoaded) 
+            while (!playersLoaded)
                 await Task.Delay(100);
         }
     }

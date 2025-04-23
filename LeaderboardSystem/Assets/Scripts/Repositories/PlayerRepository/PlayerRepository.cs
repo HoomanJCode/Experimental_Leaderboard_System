@@ -1,12 +1,11 @@
 using System;
-using System.Threading.Tasks;
-using Repositories.Models;
-using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json;
-using System.Linq;
-using UnityEngine;
 using System.Collections.Concurrent;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Repositories.Models;
+using UnityEngine;
 
 namespace Repositories
 {
@@ -18,20 +17,20 @@ namespace Repositories
         private readonly IStorageAdapter<string> _storage = new TextFileAdapter();
         private string MainPath { get; set; } = Path.Combine(Application.persistentDataPath, "Profiles");
         private int _lastPlayerId;
-        private readonly ConcurrentDictionary<int,Player> Players = new();
+        private readonly ConcurrentDictionary<int, Player> Players = new();
 
         public PlayerRepository()
         {
             if (!Directory.Exists(MainPath))
                 Directory.CreateDirectory(MainPath);
         }
-        public PlayerRepository(string mainPath,IStorageAdapter<string> storage)
+        public PlayerRepository(string mainPath, IStorageAdapter<string> storage)
         {
             _storage = storage;
             MainPath = mainPath;
         }
 
-        public async Task<int> AddPlayerAsync(string name,string description)
+        public async Task<int> AddPlayerAsync(string name, string description)
         {
             int newId = ++_lastPlayerId;
             var newPlayer = new Player(newId, name, description);
@@ -85,7 +84,7 @@ namespace Repositories
             if (await _storage.Exists(path2))
             {
                 var data = await _storage.LoadAsync(path2);
-                _lastPlayerId= int.TryParse(data, out var id) ? id : 0;
+                _lastPlayerId = int.TryParse(data, out var id) ? id : 0;
             }
             if (_lastPlayerId == 0 && Players.Count > 0)
                 _lastPlayerId = Players.Values.Max(p => p.Id);

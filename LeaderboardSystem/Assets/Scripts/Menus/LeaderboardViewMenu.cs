@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using MenuViews;
-using Repositories.Models;
 using Services;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,14 +9,14 @@ public class LeaderboardViewMenu : MenuView
 {
     [SerializeField]
     private PlayerLeaderboardRecord leaderboardRecordExample;
-    [SerializeField] 
+    [SerializeField]
     private LeaderboardJunction leaderboardJunc;
     [SerializeField]
     private Button RegisterPlayerBtn;
     [SerializeField]
     private Button RefreshLeaderboardBtn;
     private Coroutine RefreshLeaderboardTask;
-    private readonly List<PlayerLeaderboardRecord> allRecords=new();
+    private readonly List<PlayerLeaderboardRecord> allRecords = new();
     protected override void Init()
     {
         RegisterPlayerBtn.onClick.AddListener(() =>
@@ -26,7 +25,8 @@ public class LeaderboardViewMenu : MenuView
             registerMenuView.CreateMode = true;
             registerMenuView.ChangeToThisView();
         });
-        RefreshLeaderboardBtn.onClick.AddListener(() => {
+        RefreshLeaderboardBtn.onClick.AddListener(() =>
+        {
             StartRefreshLeaderboard();
         });
     }
@@ -50,19 +50,19 @@ public class LeaderboardViewMenu : MenuView
     }
     public void StartRefreshLeaderboard()
     {
-        if(RefreshLeaderboardTask!=null) StopCoroutine(RefreshLeaderboardTask);
-        RefreshLeaderboardTask=StartCoroutine(RefreshLeaderboard());
+        if (RefreshLeaderboardTask != null) StopCoroutine(RefreshLeaderboardTask);
+        RefreshLeaderboardTask = StartCoroutine(RefreshLeaderboard());
     }
     private IEnumerator RefreshLeaderboard()
     {
-        var getScoresTask= leaderboardJunc.Service.GetSortedScores();
+        var getScoresTask = leaderboardJunc.Service.GetSortedScores();
         yield return getScoresTask.UntileComplete();
         var scores = getScoresTask.Result;
-        var trashRecordsCount = allRecords.Count- scores.Count;
+        var trashRecordsCount = allRecords.Count - scores.Count;
         int recordIndex = 0;
         foreach (var item in scores)
         {
-            var getPlayerTask= PlayersAuthenticationService.Instance.GetPlayerById(item.PlayerId);
+            var getPlayerTask = PlayersAuthenticationService.Instance.GetPlayerById(item.PlayerId);
             var getAvatarTask = PlayersAuthenticationService.Instance.GetPlayerAvatarById(item.PlayerId);
             PlayerLeaderboardRecord record;
             if (allRecords.Count > recordIndex)
@@ -79,13 +79,15 @@ public class LeaderboardViewMenu : MenuView
             yield return getPlayerTask.UntileComplete();
             yield return getAvatarTask.UntileComplete();
             var avatar = getAvatarTask.Result == null ? null : getAvatarTask.Result;
-            record.SetPlayer(recordIndex + 1, getPlayerTask.Result.Name, avatar);   
+            record.SetPlayer(recordIndex + 1, getPlayerTask.Result.Name, avatar);
             record.SetScore(item.Score);
-            record.DeleteAction = async () => {
+            record.DeleteAction = async () =>
+            {
                 await leaderboardJunc.Service.DeleteScoreAsync(getPlayerTask.Result.Id);
                 StartRefreshLeaderboard();
             };
-            record.EditAction = () => {
+            record.EditAction = () =>
+            {
                 var editPageView = GetView<PlayerProfileMenu>();
                 editPageView.Name = getPlayerTask.Result.Name;
                 editPageView.Description = getPlayerTask.Result.Description;

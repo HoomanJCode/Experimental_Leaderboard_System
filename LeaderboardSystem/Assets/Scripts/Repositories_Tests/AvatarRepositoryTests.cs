@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Repositories;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 [TestFixture]
 public class AvatarRepositoryTests

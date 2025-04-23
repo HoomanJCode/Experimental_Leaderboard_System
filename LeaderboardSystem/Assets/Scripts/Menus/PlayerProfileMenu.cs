@@ -1,5 +1,4 @@
 using MenuViews;
-using Repositories.Models;
 using Services;
 using TMPro;
 using UnityEngine;
@@ -24,7 +23,8 @@ public class PlayerProfileMenu : MenuView
     [SerializeField]
     private Button DeletePlayerBtn;
     private bool _createMode;
-    public bool CreateMode {
+    public bool CreateMode
+    {
         get => _createMode;
         set
         {
@@ -59,14 +59,14 @@ public class PlayerProfileMenu : MenuView
         });
         RegisterBtn.onClick.AddListener(async () =>
         {
-            var player =await PlayersAuthenticationService.Instance.RegisterPlayer(Name, Description);
+            var player = await PlayersAuthenticationService.Instance.RegisterPlayer(Name, Description);
             //todo: submit avatar
             await leaderboardJunc.Service.PushScoreAsync(player.Id, Score);
             GetView<LeaderboardViewMenu>().ChangeToThisView();
         });
         UpdateBtn.onClick.AddListener(async () =>
         {
-            var player =await PlayersAuthenticationService.Instance.UpdatePlayer(PlayerId,Name, Description);
+            var player = await PlayersAuthenticationService.Instance.UpdatePlayer(PlayerId, Name, Description);
             //todo: update avatar
             await leaderboardJunc.Service.PushScoreAsync(PlayerId, Score);
             GetView<LeaderboardViewMenu>().ChangeToThisView();

@@ -1,12 +1,12 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Repositories;
 using Repositories.Models;
-using System.Linq;
 using Services;
-using System;
 using UnityEngine;
-using System.Collections;
 
 public class LeaderboardService : LeaderboardRepository, ILeaderboardService, IServiceSetup
 {
@@ -36,16 +36,16 @@ public class LeaderboardService : LeaderboardRepository, ILeaderboardService, IS
     }
     public Task<List<PlayerScore>> GetSortedScores()
     {
-        var list=Scores.Select(x => new PlayerScore(x.Key,x.Value)).ToList();
+        var list = Scores.Select(x => new PlayerScore(x.Key, x.Value)).ToList();
         list.Sort((a, b) => b.Score.CompareTo(a.Score));
         return Task.FromResult(list);
     }
 
-    public async Task PushScoreAsync(int playerId,int score)
+    public async Task PushScoreAsync(int playerId, int score)
     {
         if (!await PlayersAuthenticationService.Instance.PlayerExist(playerId))
             throw new InvalidOperationException("Player Not Exist!");
-        Scores.AddOrUpdate(playerId,score,(a,b)=>score);
+        Scores.AddOrUpdate(playerId, score, (a, b) => score);
         SaveChanges();
     }
     public async Task DeleteScoreAsync(int playerId)
@@ -56,7 +56,7 @@ public class LeaderboardService : LeaderboardRepository, ILeaderboardService, IS
     }
     public async Task<List<PlayerScore>> GetHighestScoresAsync(int count)
     {
-        var sortedList=await GetSortedScores();
+        var sortedList = await GetSortedScores();
         return sortedList.Take(count).ToList();
     }
     public async Task WaitCheckForSetup()

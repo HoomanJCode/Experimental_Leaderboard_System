@@ -1,11 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Repositories;
 using Repositories.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 [TestFixture]
 public class PlayerRepositoryTests
@@ -15,7 +13,7 @@ public class PlayerRepositoryTests
     [Timeout(2000)]
     public async Task AddPlayerAsync_ShouldReturnPlayerId()
     {
-        var _repository = new PlayerRepository("TestPath",new TestStorageAdapter());
+        var _repository = new PlayerRepository("TestPath", new TestStorageAdapter());
         var result = await _repository.AddPlayerAsync("New Player", "Desc");
         Assert.AreEqual(1, result); // First player should get id 1
     }
@@ -60,7 +58,7 @@ public class PlayerRepositoryTests
     {
         var _repository = new PlayerRepository("TestPath", new TestStorageAdapter());
         var playerId = await _repository.AddPlayerAsync("New Player1", "Desc");
-        var updatedPlayer = new Player(playerId, "Updated Name","Desc2");
+        var updatedPlayer = new Player(playerId, "Updated Name", "Desc2");
 
         // Act
         await _repository.UpdatePlayerAsync(new Player(playerId, updatedPlayer.Name, updatedPlayer.Description));

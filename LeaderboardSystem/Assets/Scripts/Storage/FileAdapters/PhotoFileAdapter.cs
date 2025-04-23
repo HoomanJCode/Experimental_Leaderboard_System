@@ -1,6 +1,4 @@
-using System.Collections.Concurrent;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 public class PhotoFileAdapter : FileSystemAdapter<byte[]>
 {
