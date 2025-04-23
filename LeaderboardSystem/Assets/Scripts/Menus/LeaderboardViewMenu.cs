@@ -40,12 +40,13 @@ public class LeaderboardViewMenu : MenuView
     private void Start()
     {
         leaderboardRecordExample.gameObject.SetActive(false);
-        StartRefreshLeaderboard();
+        StartCoroutine(WaitAndRefreshLeaderboardOnLoad());
 
     }
-    public void ClearLeaderboard()
+    private IEnumerator WaitAndRefreshLeaderboardOnLoad()
     {
-        foreach (var item in allRecords) Destroy(item.gameObject);
+        yield return leaderboardJunc.Service.WaitCheckForSetup().UntileComplete();
+        StartRefreshLeaderboard();
     }
     public void StartRefreshLeaderboard()
     {
@@ -54,8 +55,8 @@ public class LeaderboardViewMenu : MenuView
     }
     private IEnumerator RefreshLeaderboard()
     {
-        var getScoresTask= leaderboardJunc.Service.GetSortedScores(); 
-        yield return new WaitUntil(()=> getScoresTask.IsCompleted);
+        var getScoresTask= leaderboardJunc.Service.GetSortedScores();
+        yield return getScoresTask.UntileComplete();
         var scores = getScoresTask.Result;
         var trashRecordsCount = allRecords.Count- scores.Count;
         int recordIndex = 0;
@@ -63,9 +64,6 @@ public class LeaderboardViewMenu : MenuView
         {
             var getPlayerTask= PlayersAuthenticationService.Instance.GetPlayerById(item.PlayerId);
             var getAvatarTask = PlayersAuthenticationService.Instance.GetPlayerAvatarById(item.PlayerId);
-            yield return new WaitUntil(() => getPlayerTask.IsCompleted);
-            var avatar = getAvatarTask.Result==null? null: getAvatarTask.Result;
-            yield return new WaitUntil(() => getAvatarTask.IsCompleted);
             PlayerLeaderboardRecord record;
             if (allRecords.Count > recordIndex)
                 record = allRecords[recordIndex];
@@ -78,6 +76,9 @@ public class LeaderboardViewMenu : MenuView
                 newRecordGobj.SetActive(true);
             }
 
+            yield return getPlayerTask.UntileComplete();
+            yield return getAvatarTask.UntileComplete();
+            var avatar = getAvatarTask.Result == null ? null : getAvatarTask.Result;
             record.SetPlayer(recordIndex + 1, getPlayerTask.Result.Name, avatar);   
             record.SetScore(item.Score);
             record.DeleteAction = async () => {
