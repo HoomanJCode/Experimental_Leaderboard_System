@@ -40,12 +40,13 @@ public class LeaderboardViewMenu : MenuView
     private void Start()
     {
         leaderboardRecordExample.gameObject.SetActive(false);
-        StartRefreshLeaderboard();
+        StartCoroutine(WaitAndRefreshLeaderboardOnLoad());
 
     }
-    public void ClearLeaderboard()
+    private IEnumerator WaitAndRefreshLeaderboardOnLoad()
     {
-        foreach (var item in allRecords) Destroy(item.gameObject);
+        yield return leaderboardJunc.Service.WaitCheckForSetup().UntileComplete();
+        StartRefreshLeaderboard();
     }
     public void StartRefreshLeaderboard()
     {
@@ -54,24 +55,15 @@ public class LeaderboardViewMenu : MenuView
     }
     private IEnumerator RefreshLeaderboard()
     {
-        if(leaderboardJunc.Service.Scores.Count==0) 
-        for (var i = 0; i < 20; i++)
-        {
-            var addPlayerTask = PlayersAuthentication.RegisterPlayer($"Player {i}", $"Desc{i}");
-            yield return new WaitUntil(() => addPlayerTask.IsCompleted);
-            yield return leaderboardJunc.Service.PushScoreAsync(new PlayerScore(addPlayerTask.Result.Id, Random.Range(1, 1000)));
-        }
-
-        yield return leaderboardJunc.Service.SortScoresAsync();
-        var trashRecordsCount = allRecords.Count-leaderboardJunc.Service.Scores.Count;
+        var getScoresTask= leaderboardJunc.Service.GetSortedScores();
+        yield return getScoresTask.UntileComplete();
+        var scores = getScoresTask.Result;
+        var trashRecordsCount = allRecords.Count- scores.Count;
         int recordIndex = 0;
-        foreach (var item in leaderboardJunc.Service.Scores)
+        foreach (var item in scores)
         {
-            var getPlayerTask=PlayersAuthentication.GetPlayerById(item.PlayerId);
-            var getAvatarTask = PlayersAuthentication.GetPlayerAvatarById(item.PlayerId);
-            yield return new WaitUntil(() => getPlayerTask.IsCompleted);
-            var avatar = getAvatarTask.Result==null? null: SpriteConverter.BytesToSprite(getAvatarTask.Result.ProfileImage);
-            yield return new WaitUntil(() => getAvatarTask.IsCompleted);
+            var getPlayerTask= PlayersAuthenticationService.Instance.GetPlayerById(item.PlayerId);
+            var getAvatarTask = PlayersAuthenticationService.Instance.GetPlayerAvatarById(item.PlayerId);
             PlayerLeaderboardRecord record;
             if (allRecords.Count > recordIndex)
                 record = allRecords[recordIndex];
@@ -84,6 +76,9 @@ public class LeaderboardViewMenu : MenuView
                 newRecordGobj.SetActive(true);
             }
 
+            yield return getPlayerTask.UntileComplete();
+            yield return getAvatarTask.UntileComplete();
+            var avatar = getAvatarTask.Result == null ? null : getAvatarTask.Result;
             record.SetPlayer(recordIndex + 1, getPlayerTask.Result.Name, avatar);   
             record.SetScore(item.Score);
             record.DeleteAction = async () => {

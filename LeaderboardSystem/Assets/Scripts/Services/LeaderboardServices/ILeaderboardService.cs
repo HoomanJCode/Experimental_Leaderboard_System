@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Linq;
 public interface ILeaderboardService
 {
-    Task SortScoresAsync();
-    Task PushScoreAsync(PlayerScore score);
+    Task<List<PlayerScore>> GetSortedScores();
+    Task PushScoreAsync(int playerId, int score);
     Task<List<PlayerScore>> GetHighestScoresAsync(int count);
 }
